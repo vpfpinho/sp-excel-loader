@@ -198,12 +198,16 @@ module Sp
           end
 
           rows = Array.new
+column_list = ['dpiva_base_value','dpiva_vat_value','dpiva_gift_value','dpiva_06_a_value','dpiva_base_value_annex_1','dpiva_vat_value_annex_1','dpiva_gift_value_annex_1','dpiva_06_a_value_annex_1','dpiva_base_value_annex_2','dpiva_vat_value_annex_2','dpiva_gift_value_annex_2','dpiva_06_a_value_annex_2','dpiva_base_value_annex_40','dpiva_vat_value_annex_40','dpiva_base_value_annex_41','dpiva_vat_value_annex_41','dpiva_c1_annex_41','dpiva_c1_annex_40','ies_base_value_annex_l','ies_base_value_annex_m','ies_base_value_annex_m1','ies_base_value_annex_n','ies_vat_value_annex_l','ies_vat_value_annex_m','ies_vat_value_annex_m1','ies_vat_value_annex_n','vat_value_ids','conditions_count','regiao_anexo','relacao_clientes','relacao_fornecedores','ies_annex_p','ies_region_annex_m','ies_annex_o']
+all_updates = Array.new
           for row in ref.row_range.begin()+1..ref.row_range.end()
 
             next if ws[row].nil?
             row_values = Array.new
-            columns.each do |col|
+row_updates = Array.new
 
+upd_id = String.new
+            columns.each do |col|
               cell = ws[row][col]
               if cell.nil?
                 value = 'NULL'
@@ -231,10 +235,24 @@ module Sp
               end
 
               row_values << value
+if 'id' == ws[header_row][col].value
+upd_id = value
+else
+  if column_list.include? ws[header_row][col].value
+    row_updates << "#{ws[header_row][col].value} = #{value}"
+  end
+end
             end
             rows <<  '(' + row_values.join(',') + ')'
+all_updates << "UPDATE #{a_db_table_name} SET #{row_updates.join(',')}  WHERE id = #{upd_id};"
+
           end
           a_conn.exec("INSERT INTO #{a_db_table_name} (#{column_names.join(',')}) VALUES #{rows.join(",\n")}")
+if 'vat_codes' == a_xls_table_name
+puts "#{all_updates.join("\n")}"
+raise "\noops JOANA\n"
+end
+
         end
 
         def export_table_to_pg (a_conn, a_schema, a_prefix, a_table_name)
