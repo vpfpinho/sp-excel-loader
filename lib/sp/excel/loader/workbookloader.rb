@@ -236,15 +236,16 @@ upd_id = String.new
 
               row_values << value
 if 'id' == ws[header_row][col].value
-upd_id = value
+  upd_id = value
 else
   if column_list.include? ws[header_row][col].value
-    row_updates << "#{ws[header_row][col].value} = #{value}"
+
+    row_updates << "#{ws[header_row][col].value} = #{value.sub(/^'/,'\'\'').sub(/'$/,'\'\'')}"
   end
 end
             end
             rows <<  '(' + row_values.join(',') + ')'
-all_updates << "UPDATE #{a_db_table_name} SET #{row_updates.join(',')}  WHERE id = #{upd_id};"
+all_updates << "EXECUTE 'UPDATE #{a_db_table_name} SET #{row_updates.join(' , ')}  WHERE id = #{upd_id};'"
 
           end
           a_conn.exec("INSERT INTO #{a_db_table_name} (#{column_names.join(',')}) VALUES #{rows.join(",\n")}")
