@@ -198,12 +198,13 @@ module Sp
           end
 
           rows = Array.new
+rows_ins = Array.new
           for row in ref.row_range.begin()+1..ref.row_range.end()
 
             next if ws[row].nil?
             row_values = Array.new
+row_inserts = Array.new
             columns.each do |col|
-
               cell = ws[row][col]
               if cell.nil?
                 value = 'NULL'
@@ -231,10 +232,16 @@ module Sp
               end
 
               row_values << value
+row_inserts << value.to_s.sub(/^'/,"''").sub(/'$/,"''")
             end
             rows <<  '(' + row_values.join(',') + ')'
+rows_ins <<  '(' + row_inserts.join(',') + ')'
           end
           a_conn.exec("INSERT INTO #{a_db_table_name} (#{column_names.join(',')}) VALUES #{rows.join(",\n")}")
+
+if ['vat_codes', 'vat_codes_conditions'].include? a_xls_table_name
+puts %Q[EXECUTE 'INSERT INTO #{a_db_table_name} (#{column_names.join(',')}) VALUES #{rows_ins.join(",\n")};'\n]
+end
         end
 
         def export_table_to_pg (a_conn, a_schema, a_prefix, a_table_name)
