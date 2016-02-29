@@ -473,6 +473,7 @@ module Sp
 
             if ! (m = /\A\$P{(.+)}\z/.match a_expression.strip).nil?
 
+              # parameter
               f_id                     = a_expression.strip
               rv                       = @widget_factory.new_for_field(f_id)
               rv.text_field_expression = a_expression
@@ -481,6 +482,7 @@ module Sp
 
             elsif ! (m = /\A\$F{(.+)}\z/.match a_expression.strip).nil?
 
+              # field
               f_id                     = a_expression.strip
               rv                       = @widget_factory.new_for_field(f_id)
               rv.text_field_expression = a_expression
@@ -489,6 +491,7 @@ module Sp
 
             elsif ! (m = /\A\$V{(.+)}\z/.match a_expression.strip).nil?
 
+              # variable
               f_id                     = a_expression.strip
               rv                       = @widget_factory.new_for_field(f_id)
               rv.text_field_expression = a_expression
@@ -515,6 +518,32 @@ module Sp
 
               rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"name\")"
 
+            elsif a_expression.match(/^\$CB{/)
+                
+                # checkbox
+                checkbox = @widget_factory.new_checkbox(a_expression.strip)
+                rv = checkbox[:widget]
+
+            elsif a_expression.match(/^\$RB{/)
+                
+                # checkbox
+                radio_button = @widget_factory.new_radio_button(a_expression.strip)
+                rv = radio_button[:widget]
+
+            elsif a_expression.match(/^\$DE{/)
+                
+                de = a_expression.strip.split(',')
+                de[0] = de[0][4..de[0].length-1]
+                de[1] = de[1][0..de[1].length-2]
+
+                properties = [
+                                Property.new("epaper.casper.text.field.editable", "false"),
+                                Property.new("epaper.casper.text.field.editable.field_name", de[0][3..de[0].length-2])
+                             ]
+
+                rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
+                rv.text_field_expression = de[1]
+
             else
 
               if a_expression.match(/^\$SE{/)
@@ -537,16 +566,17 @@ module Sp
                   end
                 }
                 rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = expression[4..expression.length-2]
+                rv.text_field_expression = expression[4..expression.length-2]              
+            else
+              if a_expression.strip.include? "$"
+                puts a_expression
+                rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+                rv.text_field_expression = a_expression
               else
-                if a_expression.strip.include? "$"
-                  rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                  rv.text_field_expression = a_expression
-                else
-                  rv = StaticText.new
-                  rv.text = a_expression
-                end
+                rv = StaticText.new
+                rv.text = a_expression
               end
+            end
 
 
             end

@@ -35,14 +35,19 @@ module Sp
 
         class Editable < Extension
 
-          def initialize ()
+          attr_accessor :field_id
+
+          def initialize (a_field_id)
+
+            if a_field_id[0] != "$"
+              raise ArgumentError, "Invalid field id: '#{a_field_id}'!"
+            end
+
+            @field_id   = a_field_id[3..a_field_id.length-2]
             @properties = []
+            @properties << Property.new("epaper.casper.text.field.editable.field_name", @field_id)
             @properties << Property.new("epaper.casper.text.field.editable", "true")
           end
-
-        end
-
-        class InputBox < Editable
 
         end
 
@@ -50,8 +55,8 @@ module Sp
 
           attr_accessor :id
 
-          def initialize (a_id, a_uri)
-            super()
+          def initialize (a_field_id, a_id, a_uri)
+            super(a_field_id)
             @id = a_id
             @properties << Property.new("epaper.casper.text.field.load.uri"                                            , a_uri)
             @properties << Property.new("epaper.casper.text.field.attach"                                              , "drop-down_list")
@@ -63,6 +68,30 @@ module Sp
             # @properties << Property.new("epaper.casper.text.field.patch.name"                              , "journal_id")
             # @properties << Property.new("epaper.casper.text.field.patch.type",                            , "java.lang.String")
 
+          end
+
+        end
+
+        class Checkbox < Editable
+
+          def initialize (a_field_id)
+            super(a_field_id)
+            @properties = [
+                            Property.new("epaper.casper.text.field.editable"           , "false"),
+                            Property.new("epaper.casper.text.field.editable.field_name", @field_id)
+                          ]
+          end
+
+        end
+
+        class RadioButton < Editable
+
+          def initialize (a_field_id)
+            super(a_field_id)
+            @properties = [
+                            Property.new("epaper.casper.text.field.editable"           , "false"),
+                            Property.new("epaper.casper.text.field.editable.field_name", @field_id)
+                          ]
           end
 
         end
@@ -173,8 +202,8 @@ module Sp
           end
 
           def new_for_field (a_id)
-            if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)
-              editable = ( ( true  == @fields_map.has_key?(a_id) && true == @fields_map[a_id].editable     ) ? Editable.new : nil )
+            if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)              
+              editable = ( ( true  == @fields_map.has_key?(a_id) && true == @fields_map[a_id].editable     ) ? Editable.new(a_id) : nil )
             else
               editable = nil
             end
@@ -191,9 +220,27 @@ module Sp
             config = a_config.strip[3..a_config.strip.length-2].strip.split(',')
             config[0].strip!
             config[1].strip!
-            editable = ClientCombo.new(a_id=config[0], a_uri="model://#{config[0]}")
+            editable = ClientCombo.new(a_field_id=config[1], a_id=config[0], a_uri="model://#{config[0]}")
             widget = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
             { id: editable.id, widget: widget, field:config[1] }
+          end
+
+          def new_checkbox(a_config)
+            # check box: $CB{<field_name>,<unchecked>,<check
+            cb       = a_config[4..a_config.length-2].split(',')
+            editable = Checkbox.new(a_id=cb[0])
+            widget   = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
+            widget.text_field_expression = "IF(#{cb[0]}==#{cb[2]};\"X\";\"\")"
+            { widget: widget, field: cb[0] }
+          end
+
+          def new_radio_button(a_config)
+            # check box: $RB{<field_name>,<unchecked>,<check
+            rb       = a_config[4..a_config.length-2].split(',')
+            editable = RadioButton.new(a_id=rb[0])
+            widget   = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
+            widget.text_field_expression = "IF(#{rb[0]}==#{rb[2]};\"X\";\"\")"
+            { widget: widget, field: rb[0] }
           end
 
           def java_class (a_id)
