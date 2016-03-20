@@ -31,23 +31,29 @@ module Sp
           attr_accessor :height
           attr_accessor :style
           attr_accessor :properties
+          attr_accessor :position_type
+          attr_accessor :stretch_type
 
           def initialize
-            @x          = 0
-            @y          = 0
-            @width      = 0
-            @height     = 0
-            @style      = nil
-            @properties = nil
+            @x             = 0
+            @y             = 0
+            @width         = 0
+            @height        = 0
+            @style         = nil
+            @properties    = nil
+            @position_type = 'FixRelativeToTop'
+            @stretch_type  = 'NoStretch'
           end
 
           def attributes
             rv = Hash.new
-            rv['x']      = @x
-            rv['y']      = @y
-            rv['width']  = @width
-            rv['height'] = @height
-            rv['style']  = @style unless @style.nil?
+            rv['x']            = @x
+            rv['y']            = @y
+            rv['width']        = @width
+            rv['height']       = @height
+            rv['style']        = @style unless @style.nil?
+            rv['positionType'] = @position_type unless @position_type == 'FixRelativeToTop'
+            rv['stretchType']  = @stretch_type  unless @stretch_type  == 'NoStretch'
             return rv
           end
 

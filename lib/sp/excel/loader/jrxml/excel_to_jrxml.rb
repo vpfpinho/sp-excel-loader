@@ -34,10 +34,13 @@ module Sp
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
             @report = JasperReport.new(report_name)
-            @current_band      = nil
-            @first_row_in_band = 0
-            @band_type         = nil
-            @v_scale           = 1
+            @current_band            = nil
+            @first_row_in_band       = 0
+            @band_type               = nil
+            @v_scale                 = 1
+            @detail_cols_auto_height = false
+            @auto_float              = false
+            @auto_stretch            = false
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
@@ -349,6 +352,12 @@ module Sp
               @report.query_string = a_row_tag.split(':')[1].strip
             when /Id:.+/i
               @report.id = a_row_tag.split(':')[1].strip
+            when /DetailColsAutoHeight:.+/i
+              @detail_cols_auto_height = a_row_tag.split(':')[1].strip == 'true'
+            when /AutoFloat:.+/i
+              @auto_float = a_row_tag.split(':')[1].strip == 'true'
+            when /AutoStretch:.+/i
+              @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
             else
               @current_band = nil
               @band_type    = nil
@@ -394,6 +403,19 @@ module Sp
                 field.report_element.width  = cell_width
                 field.report_element.height = cell_height
                 field.report_element.style  = 'style_' + (row[col_idx].style_index + 1).to_s
+
+
+                if @detail_cols_auto_height and @band_type.match(/DT\d*:/)
+                  field.report_element.stretch_type = 'RelativeToBandHeight'
+                end
+
+                if @auto_float and field.report_element.y != 0
+                  field.report_element.position_type = 'Float'
+                end
+
+                if @auto_stretch and field.respond_to?('is_stretch_with_overflow')
+                  field.is_stretch_with_overflow = true
+                end
 
                 # If the field is from a horizontally merged cell we need to check the right side border
                 if col_span > 1

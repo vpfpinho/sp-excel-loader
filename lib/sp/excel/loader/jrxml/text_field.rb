@@ -32,7 +32,7 @@ module Sp
           def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()
             @text_field_expression     = nil
-            @is_stretch_with_overflow  = true
+            @is_stretch_with_overflow  = false
             @pattern_expression        = a_pattern_expression
             @report_element.properties = a_properties
             @attributes                = a_pattern.nil? ? nil : { pattern: a_pattern }
@@ -40,7 +40,7 @@ module Sp
 
           def attributes
             rv = Hash.new
-            rv['isStretchWithOverflow'] = @is_stretch_with_overflow unless is_stretch_with_overflow.nil?
+            rv['isStretchWithOverflow'] = true if @is_stretch_with_overflow
             rv['pattern']               = @pattern unless @pattern.nil?
             return rv
           end
