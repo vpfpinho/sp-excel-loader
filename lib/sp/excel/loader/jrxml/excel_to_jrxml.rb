@@ -29,14 +29,27 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map)
+          def initialize (a_excel_filename, a_fields_map = nil)
             super(a_excel_filename)
+            read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
             @report = JasperReport.new(report_name)
             @current_band      = nil
             @first_row_in_band = 0
             @band_type         = nil
             @v_scale           = 1
+
+            # If the field map is not supplied load aux tables from the same excel
+            if a_fields_map.nil?
+              a_fields_map = Hash.new
+              params_def.each do |param|
+                a_fields_map[param.id] = param
+              end
+              fields_def.each do |field|
+                a_fields_map[field.id] = field
+              end
+            end
+
             @widget_factory    = WidgetFactory.new(a_fields_map)
 
             generate_styles()
@@ -179,7 +192,7 @@ module Sp
               a_pen.line_style = 'Solid'
             when 'dashed'
               a_pen.line_width = 1.0
-              a_pen.line_style = ''
+              a_pen.line_style = 'Dotted'
             when 'dotted'
               a_pen.line_width = 0.5
               a_pen.line_style = 'Dotted'
@@ -232,8 +245,10 @@ module Sp
 
           def parse_sheets
             @workbook.worksheets.each do |ws|
-              @worksheet = ws
-              @raw_width = 0
+              @worksheet    = ws
+              @raw_width    = 0
+              @current_band = nil
+              @band_type    = nil
               for col in (1 .. @worksheet.dimension.ref.col_range.end)
                 @raw_width += @worksheet.get_column_width_raw(col)
               end
@@ -471,6 +486,7 @@ module Sp
 
           def create_field (a_expression)
 
+
             if ! (m = /\A\$P{(.+)}\z/.match a_expression.strip).nil?
 
               # parameter
@@ -519,19 +535,19 @@ module Sp
               rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"name\")"
 
             elsif a_expression.match(/^\$CB{/)
-                
+
                 # checkbox
                 checkbox = @widget_factory.new_checkbox(a_expression.strip)
                 rv = checkbox[:widget]
 
             elsif a_expression.match(/^\$RB{/)
-                
+
                 # checkbox
                 radio_button = @widget_factory.new_radio_button(a_expression.strip)
                 rv = radio_button[:widget]
 
             elsif a_expression.match(/^\$DE{/)
-                
+
                 de = a_expression.strip.split(',')
                 de[0] = de[0][4..de[0].length-1]
                 de[1] = de[1][0..de[1].length-2]
@@ -553,25 +569,27 @@ module Sp
                 expression.scan(/\$[A-Z]{[a-z_0-9\-#]+}/) { |v|
                   f_id = (/\A\$[PFV]{(.+)}\z/.match v).to_s
                   if false == f_id.nil?
-                    f_nm = f_id[3..f_id.length-2]
+                    f_nm = f_id[3..-2]
                     if f_id.match(/^\$P{/)
                       add_parameter(f_id, f_nm)
                     elsif f_id.match(/^\$F{/)
-                      add_parameter(f_id, f_nm)
+                      add_parameter(f_id, f_nm) # ? Check with Americo ?
                     elsif f_id.match(/^\$V{/)
-                      add_parameter(f_id, f_nm)
+                      add_parameter(f_id, f_nm) # ? Check with Americo ?
                     else
                       raise ArgumentError, "Don't know how to add '#{f_id}'!"
                     end
                   end
                 }
                 rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = expression[4..expression.length-2]              
+                rv.text_field_expression = expression[4..expression.length-2]
             else
-              if a_expression.strip.include? "$"
-                puts a_expression
+              if a_expression.include? '$P{' or a_expression.include? '$F{' or a_expression.include? '$V{'
+                unless a_expression.include? '+'
+                  a_expression = transform_expression(a_expression)
+                end
                 rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = a_expression
+                rv.text_field_expression = a_expression.strip
               else
                 rv = StaticText.new
                 rv.text = a_expression
@@ -581,6 +599,29 @@ module Sp
 
             end
             return rv
+          end
+
+          def transform_expression (a_expression)
+            matches = a_expression.split(/(\$[PVF]{[^{}]+})/)
+            if matches.nil?
+              return a_expression
+            end
+            terms = Array.new
+            matches.each do |match|
+              if match.start_with?('$P{')
+                terms << match
+                add_parameter(match[0], match[3..-2])
+              elsif match.start_with?('$F{')
+                terms << match
+                add_field(match[0], match[3..-2])
+              elsif match.start_with?('$V{')
+                terms << match
+                add_variable(match[0], match[3..-2])
+              else
+                terms << '"' + match + '"'
+              end
+            end
+            terms.join(' + ')
           end
 
           def add_parameter (a_id, a_name)
@@ -631,11 +672,11 @@ module Sp
             height = 0
             for row in @worksheet.dimension.ref.row_range
               unless @worksheet[row].nil? or @worksheet[row][0].nil? or @worksheet[row][0].value.nil? or @worksheet[row][0].value != @band_type
-                height += scale_y(@worksheet.get_row_height(row))
+                height += @worksheet.get_row_height(row)
               end
             end
 
-            @current_band.height = height
+            @current_band.height = scale_y(height)
           end
 
           def measure_cell (a_row_idx, a_col_idx)
@@ -671,6 +712,7 @@ module Sp
           def scale_y (a_height)
             return (a_height * @v_scale).round
           end
+
 
         end # class ExcelToJrxml
 

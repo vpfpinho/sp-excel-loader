@@ -202,8 +202,8 @@ module Sp
           end
 
           def new_for_field (a_id)
-            if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)              
-              editable = ( ( true  == @fields_map.has_key?(a_id) && true == @fields_map[a_id].editable     ) ? Editable.new(a_id) : nil )
+            if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)
+              editable = @fields_map.has_key?(a_id) && @fields_map[a_id].editable ? Editable.new(a_id) : nil
             else
               editable = nil
             end
@@ -246,10 +246,10 @@ module Sp
           def java_class (a_id)
             if @fields_map.has_key?(a_id)
               @fields_map[a_id].java_class
-            elsif "$V{PAGE_NUMBER}" == a_id || "$V{CONTINUOUS_PAGE_NUMBER}" == a_id
-              "java.lang.Integer"
+            elsif '$V{PAGE_NUMBER}' == a_id || '$V{CONTINUOUS_PAGE_NUMBER}' == a_id
+              'java.lang.Integer'
             else
-              raise ArgumentError, "Don't know how to set '#{a_id}' java class!"
+              'java.lang.String'
             end
           end
 

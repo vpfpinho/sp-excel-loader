@@ -26,14 +26,23 @@ module Sp
         class TextField < StaticText
 
           attr_accessor :text_field_expression
+          attr_accessor :is_stretch_with_overflow
           attr_accessor :pattern
 
           def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()
             @text_field_expression     = nil
+            @is_stretch_with_overflow  = true
             @pattern_expression        = a_pattern_expression
             @report_element.properties = a_properties
             @attributes                = a_pattern.nil? ? nil : { pattern: a_pattern }
+          end
+
+          def attributes
+            rv = Hash.new
+            rv['isStretchWithOverflow'] = @is_stretch_with_overflow unless is_stretch_with_overflow.nil?
+            rv['pattern']               = @pattern unless @pattern.nil?
+            return rv
           end
 
           def to_xml (a_node)
