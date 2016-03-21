@@ -33,9 +33,9 @@ module Sp
             super()
             @text_field_expression     = nil
             @is_stretch_with_overflow  = false
+            @pattern                   = a_pattern
             @pattern_expression        = a_pattern_expression
             @report_element.properties = a_properties
-            @attributes                = a_pattern.nil? ? nil : { pattern: a_pattern }
           end
 
           def attributes
