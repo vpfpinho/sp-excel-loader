@@ -41,16 +41,26 @@ module Sp
             @detail_cols_auto_height = false
             @auto_float              = false
             @auto_stretch            = false
+            @band_split_type         = nil
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
               a_fields_map = Hash.new
-              params_def.each do |param|
-                a_fields_map[param.id] = param
+
+              # Load parameters config table if it exists
+              if respond_to?('params_def')
+                params_def.each do |param|
+                  a_fields_map[param.id] = param
+                end
               end
-              fields_def.each do |field|
-                a_fields_map[field.id] = field
+
+              # Load fields config table if it exists
+              if respond_to?('fields_def')
+                fields_def.each do |field|
+                  a_fields_map[field.id] = field
+                end
               end
+
             end
 
             @widget_factory    = WidgetFactory.new(a_fields_map)
@@ -253,7 +263,7 @@ module Sp
               @current_band = nil
               @band_type    = nil
               for col in (1 .. @worksheet.dimension.ref.col_range.end)
-                @raw_width += @worksheet.get_column_width_raw(col)
+                @raw_width += get_column_width(@worksheet, col)
               end
               generate_bands()
             end
@@ -358,6 +368,10 @@ module Sp
               @auto_float = a_row_tag.split(':')[1].strip == 'true'
             when /AutoStretch:.+/i
               @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
+            when /Report.isStartNewPage:.+/i
+              @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
+            when /Band.splitType:.+/i
+              @band_split_type = a_row_tag.split(':')[1].strip
             else
               @current_band = nil
               @band_type    = nil
@@ -386,6 +400,7 @@ module Sp
             max_cell_height = 0
             col_idx         = 1
 
+            @current_band.split_type = @band_split_type unless @band_split_type.nil?
             while col_idx < row.size do
 
               col_span, row_span, cell_width, cell_height = measure_cell(a_row_idx, col_idx)
@@ -404,9 +419,11 @@ module Sp
                 field.report_element.height = cell_height
                 field.report_element.style  = 'style_' + (row[col_idx].style_index + 1).to_s
 
-
-                if @detail_cols_auto_height and @band_type.match(/DT\d*:/)
-                  field.report_element.stretch_type = 'RelativeToBandHeight'
+                if @band_type.match(/DT\d*:/)
+                  @current_band.split_type = 'Immediate' if @band_split_type.nil?
+                  if @detail_cols_auto_height
+                    field.report_element.stretch_type = 'RelativeToBandHeight'
+                  end
                 end
 
                 if @auto_float and field.report_element.y != 0
@@ -669,11 +686,18 @@ module Sp
             end
           end
 
+          def get_column_width (a_worksheet, a_index)
+            width   = a_worksheet.get_column_width_raw(a_index)
+            width ||= RubyXL::ColumnRange::DEFAULT_WIDTH
+            return width
+          end
+
+
           def x_for_column (a_col_idx)
 
             width = 0
             for idx in (1 .. a_col_idx - 1) do
-              width += @worksheet.get_column_width_raw(idx)
+              width += get_column_width(@worksheet, idx)
             end
             return scale_x(width)
 
@@ -723,7 +747,7 @@ module Sp
               end
             end
 
-            return 1, 1, scale_x(@worksheet.get_column_width_raw(a_col_idx)), scale_y(@worksheet.get_row_height(a_row_idx))
+            return 1, 1, scale_x(get_column_width(@worksheet, a_col_idx)), scale_y(@worksheet.get_row_height(a_row_idx))
 
           end
 

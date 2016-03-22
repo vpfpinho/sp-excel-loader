@@ -34,7 +34,7 @@ module Sp
           def initialize
             @children              = Array.new
             @height                = 18;
-            @split_type            = 'Stretch'
+            @split_type            = 'Prevent'
             @print_when_expression = nil
             @properties            = nil
           end

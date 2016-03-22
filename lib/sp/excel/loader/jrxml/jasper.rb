@@ -28,6 +28,17 @@ module Sp
         class JasperReport
 
           #
+          # Attributes that can be configured using row tags
+          #
+          attr_accessor :column_width
+          attr_accessor :left_margin
+          attr_accessor :right_margin
+          attr_accessor :top_margin
+          attr_accessor :bottom_margin
+          attr_accessor :report_name
+          attr_accessor :is_title_new_page
+
+          #
           # Report class instance data
           #
           attr_accessor :parameters
@@ -43,12 +54,6 @@ module Sp
           attr_accessor :page_width
           attr_accessor :page_height
           attr_accessor :no_data_section
-          attr_accessor :column_width
-          attr_accessor :left_margin
-          attr_accessor :right_margin
-          attr_accessor :top_margin
-          attr_accessor :bottom_margin
-          attr_accessor :report_name
           attr_accessor :orientation
           attr_accessor :paper_size
           attr_accessor :properties
@@ -67,17 +72,18 @@ module Sp
             @band_containers = Array.new
 
             # defaults for jasper report attributes
-            @orientation     = 'Landscape'
-            @paper_size      = 'A4'
-            @page_width      = 595
-            @page_height     = 842
-            @no_data_section = 'NoPages'
-            @column_width    = 522
-            @left_margin     = 36
-            @right_margin    = 37
-            @top_margin      = 30
-            @bottom_margin   = 30
-            @report_name     = a_name
+            @orientation       = 'Landscape'
+            @paper_size        = 'A4'
+            @page_width        = 595
+            @page_height       = 842
+            @no_data_section   = 'NoPages'
+            @column_width      = 522
+            @left_margin       = 36
+            @right_margin      = 37
+            @top_margin        = 30
+            @bottom_margin     = 30
+            @report_name       = a_name
+            @is_title_new_page = false
             @is_summary_with_page_header_and_footer = true;
             @is_float_column_footer                 = true;
             @generator_version = Sp::Excel::Loader::VERSION
@@ -118,6 +124,7 @@ module Sp
                                'rightMargin'        => @right_margin,
                                'topMargin'          => @top_margin,
                                'bottomMargin'       => @bottom_margin,
+                               'isTitleNewPage'     => @is_title_new_page,
                                'isSummaryWithPageHeaderAndFooter' => @is_summary_with_page_header_and_footer,
                                'isFloatColumnFooter'              => @is_float_column_footer) {
                 xml.comment('created with core-excel-loader ' + @generator_version)
