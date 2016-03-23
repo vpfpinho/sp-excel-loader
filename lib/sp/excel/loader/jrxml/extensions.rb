@@ -207,7 +207,7 @@ module Sp
             else
               editable = nil
             end
-            pattern  = ( ( false == @fields_map.has_key?(a_id) ||  nil == @fields_map[a_id].presentation ) ? nil : @fields_map[a_id].presentation.format )
+            pattern  = @fields_map[a_id].presentation.format if @fields_map.has_key?(a_id) && @fields_map[a_id].presentation != ''
             if editable.nil?
               widget = TextField.new(a_properties = nil, a_pattern = pattern, a_pattern_expression = nil)
             else
