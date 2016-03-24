@@ -23,6 +23,17 @@ module Sp
     module Loader
       module Jrxml
 
+
+        class Presentation
+
+            attr_accessor :format
+
+            def initialize (a_format)
+              @format = a_format
+            end
+
+        end # end class Presentation
+
         class Extension
 
           attr_accessor :properties

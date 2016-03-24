@@ -51,6 +51,7 @@ module Sp
               # Load parameters config table if it exists
               if respond_to?('params_def')
                 params_def.each do |param|
+                  param.presentation = Presentation.new(param.presentation)
                   a_fields_map[param.id] = param
                 end
               end
@@ -58,6 +59,7 @@ module Sp
               # Load fields config table if it exists
               if respond_to?('fields_def')
                 fields_def.each do |field|
+                  field.presentation = Presentation.new(field.presentation)
                   a_fields_map[field.id] = field
                 end
               end
