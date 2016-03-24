@@ -556,7 +556,7 @@ module Sp
 
               add_variable(f_id, m[1])
 
-            elsif ! (m = /\A\$C{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$C{(.+)}\z/.match a_expression.strip).nil?
 
               # combo
               combo = @widget_factory.new_combo(a_expression.strip)
