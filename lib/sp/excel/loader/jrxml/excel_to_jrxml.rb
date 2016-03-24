@@ -42,6 +42,7 @@ module Sp
             @auto_float              = false
             @auto_stretch            = false
             @band_split_type         = nil
+            @basic_expressions       = false
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
@@ -372,6 +373,8 @@ module Sp
               @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
             when /Band.splitType:.+/i
               @band_split_type = a_row_tag.split(':')[1].strip
+            when /BasicExpressions:.+i/
+              @widget_factory.basic_expressions = a_row_tag.split(':')[1].strip == 'true'
             else
               @current_band = nil
               @band_type    = nil
@@ -526,7 +529,7 @@ module Sp
           def create_field (a_expression)
 
 
-            if ! (m = /\A\$P{(.+)}\z/.match a_expression.strip).nil?
+            if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
 
               # parameter
               f_id                     = a_expression.strip
@@ -535,7 +538,7 @@ module Sp
 
               add_parameter(f_id, m[1])
 
-            elsif ! (m = /\A\$F{(.+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
 
               # field
               f_id                     = a_expression.strip
@@ -544,7 +547,7 @@ module Sp
 
               add_field(f_id.strip, m[1])
 
-            elsif ! (m = /\A\$V{(.+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
 
               # variable
               f_id                     = a_expression.strip
@@ -553,7 +556,7 @@ module Sp
 
               add_variable(f_id, m[1])
 
-            elsif ! (m = /\A\$C{(.+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$C{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
 
               # combo
               combo = @widget_factory.new_combo(a_expression.strip)
@@ -577,16 +580,19 @@ module Sp
 
                 # checkbox
                 checkbox = @widget_factory.new_checkbox(a_expression.strip)
+                declare_expression_entities(a_expression.strip)
                 rv = checkbox[:widget]
 
             elsif a_expression.match(/^\$RB{/)
 
-                # checkbox
+                # radio button
+                declare_expression_entities(a_expression.strip)
                 radio_button = @widget_factory.new_radio_button(a_expression.strip)
                 rv = radio_button[:widget]
 
             elsif a_expression.match(/^\$DE{/)
 
+                declare_expression_entities(a_expression.strip)
                 de = a_expression.strip.split(',')
                 de[0] = de[0][4..de[0].length-1]
                 de[1] = de[1][0..de[1].length-2]
@@ -599,55 +605,57 @@ module Sp
                 rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
                 rv.text_field_expression = de[1]
 
-            else
+            elsif a_expression.match(/^\$SE{/)
 
-              if a_expression.match(/^\$SE{/)
-
+                declare_expression_entities(a_expression.strip)
                 expression = a_expression.strip
-
-                expression.scan(/\$[A-Z]{[a-z_0-9\-#]+}/) { |v|
-                  f_id = (/\A\$[PFV]{(.+)}\z/.match v).to_s
-                  if false == f_id.nil?
-                    f_nm = f_id[3..-2]
-                    if f_id.match(/^\$P{/)
-                      add_parameter(f_id, f_nm)
-                    elsif f_id.match(/^\$F{/)
-                      add_parameter(f_id, f_nm) # ? Check with Americo ?
-                    elsif f_id.match(/^\$V{/)
-                      add_parameter(f_id, f_nm) # ? Check with Americo ?
-                    else
-                      raise ArgumentError, "Don't know how to add '#{f_id}'!"
-                    end
-                  end
-                }
                 rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
                 rv.text_field_expression = expression[4..expression.length-2]
-            else
-              if a_expression.include? '$P{' or a_expression.include? '$F{' or a_expression.include? '$V{'
-                unless a_expression.include? '+'
-                  a_expression = transform_expression(a_expression)
-                end
+
+            elsif a_expression.include? '$P{' or a_expression.include? '$F{' or a_expression.include? '$V{'
+
+                a_expression = transform_expression(a_expression)
                 rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
                 rv.text_field_expression = a_expression.strip
-              else
+
+            else
                 rv = StaticText.new
                 rv.text = a_expression
-              end
             end
 
-
-            end
             return rv
           end
 
+          def declare_expression_entities (a_expression)
+
+            a_expression.scan(/\$[A-Z]{[a-z_0-9\-#]+}/) { |v|
+              f_id = (/\A\$[PFV]{(.+)}\z/.match v).to_s
+              if false == f_id.nil?
+                f_nm = f_id[3..-2]
+                if f_id.match(/^\$P{/)
+                  add_parameter(f_id, f_nm)
+                elsif f_id.match(/^\$F{/)
+                  add_field(f_id, f_nm)
+                elsif f_id.match(/^\$V{/)
+                  add_variable(f_id, f_nm)
+                else
+                  raise ArgumentError, "Don't know how to add '#{f_id}'!"
+                end
+              end
+            }
+            nil
+          end
+
           def transform_expression (a_expression)
-            matches = a_expression.split(/(\$[PVF]{[^{}]+})/)
+            matches = a_expression.split(/(\$[PVF]{[a-zA-Z0-9_]+})/)
             if matches.nil?
               return a_expression
             end
             terms = Array.new
             matches.each do |match|
-              if match.start_with?('$P{')
+              if match.length == 0
+                next
+              elsif match.start_with?('$P{')
                 terms << match
                 add_parameter(match[0], match[3..-2])
               elsif match.start_with?('$F{')

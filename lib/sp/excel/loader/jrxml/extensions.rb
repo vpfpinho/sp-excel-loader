@@ -197,17 +197,27 @@ module Sp
 
         class WidgetFactory
 
+          attr_accessor :basic_expressions
+
           def initialize (a_map)
             @fields_map = a_map
+            @basic_expressions = false
           end
 
           def new_for_field (a_id)
+
             if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)
               editable = @fields_map.has_key?(a_id) && @fields_map[a_id].editable ? Editable.new(a_id) : nil
             else
               editable = nil
             end
-            pattern  = @fields_map[a_id].presentation.format if @fields_map.has_key?(a_id) && @fields_map[a_id].presentation != ''
+
+            if @fields_map.has_key?(a_id) and not @fields_map[a_id].presentation.nil? and @fields_map[a_id].presentation.format != ''
+              pattern = @fields_map[a_id].presentation.format
+            else
+              pattern = nil
+            end
+
             if editable.nil?
               widget = TextField.new(a_properties = nil, a_pattern = pattern, a_pattern_expression = nil)
             else
@@ -217,7 +227,7 @@ module Sp
           end
 
           def new_combo(a_config)
-            config = a_config.strip[3..a_config.strip.length-2].strip.split(',')
+            config = a_config.strip[3..-2].strip.split(',')
             config[0].strip!
             config[1].strip!
             editable = ClientCombo.new(a_field_id=config[1], a_id=config[0], a_uri="model://#{config[0]}")
@@ -227,19 +237,27 @@ module Sp
 
           def new_checkbox(a_config)
             # check box: $CB{<field_name>,<unchecked>,<check
-            cb       = a_config[4..a_config.length-2].split(',')
+            cb       = a_config[4..-2].split(',')
             editable = Checkbox.new(a_id=cb[0])
             widget   = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
-            widget.text_field_expression = "IF(#{cb[0]}==#{cb[2]};\"X\";\"\")"
+            if @basic_expressions
+              widget.text_field_expression = "IF(#{cb[0]}==#{cb[2]};\"X\";\"\")"
+            else
+              widget.text_field_expression = "#{cb[0]} == #{cb[2]} ? \"X\" : \"\""
+            end
             { widget: widget, field: cb[0] }
           end
 
           def new_radio_button(a_config)
             # check box: $RB{<field_name>,<unchecked>,<check
-            rb       = a_config[4..a_config.length-2].split(',')
+            rb       = a_config[4..-2].split(',')
             editable = RadioButton.new(a_id=rb[0])
             widget   = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
-            widget.text_field_expression = "IF(#{rb[0]}==#{rb[2]};\"X\";\"\")"
+            if @basic_expressions
+              widget.text_field_expression = "IF(#{rb[0]}==#{rb[2]};\"X\";\"\")"
+            else
+              widget.text_field_expression = "#{rb[0]} == #{rb[2]} ? \"X\" : \"\""
+            end
             { widget: widget, field: rb[0] }
           end
 
@@ -247,9 +265,13 @@ module Sp
             if @fields_map.has_key?(a_id)
               @fields_map[a_id].java_class
             elsif '$V{PAGE_NUMBER}' == a_id || '$V{CONTINUOUS_PAGE_NUMBER}' == a_id
-              'java.lang.Integer'
+              return 'java.lang.Integer'
             else
-              'java.lang.String'
+              if @basic_expressions
+                raise ArgumentError, "Don't know how to set '#{a_id}' java class!"
+              else
+                return 'java.lang.String'
+              end
             end
           end
 
