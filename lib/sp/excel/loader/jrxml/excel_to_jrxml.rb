@@ -369,7 +369,7 @@ module Sp
               @auto_float = a_row_tag.split(':')[1].strip == 'true'
             when /AutoStretch:.+/i
               @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
-            when /Report.isStartNewPage:.+/i
+            when /Report.isTitleStartNewPage:.+/i
               @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
             when /Band.splitType:.+/i
               @band_split_type = a_row_tag.split(':')[1].strip
