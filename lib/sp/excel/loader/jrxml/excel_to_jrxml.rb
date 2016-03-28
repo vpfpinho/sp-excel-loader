@@ -49,7 +49,7 @@ module Sp
               a_fields_map = Hash.new
 
               # Load parameters config table if it exists
-              if respond_to?('params_def')
+              if respond_to?('params_def') and not params_def.nil?
                 params_def.each do |param|
                   param.presentation = Presentation.new(param.presentation)
                   a_fields_map[param.id] = param
@@ -57,7 +57,7 @@ module Sp
               end
 
               # Load fields config table if it exists
-              if respond_to?('fields_def')
+              if respond_to?('fields_def') and not fields_def.nil?
                 fields_def.each do |field|
                   field.presentation = Presentation.new(field.presentation)
                   a_fields_map[field.id] = field
@@ -174,8 +174,10 @@ module Sp
 
             # Alignment
             if xf.apply_alignment
+
+              #byebug if a_style_index == 111
               case xf.alignment.horizontal
-              when 'left'
+              when 'left', nil
                 style.h_text_align ='Left'
               when 'center'
                 style.h_text_align ='Center'
@@ -188,8 +190,22 @@ module Sp
                 style.v_text_align ='Top'
               when 'center'
                 style.v_text_align ='Middle'
-              when 'bottom'
+              when 'bottom', nil
                 style.v_text_align ='Bottom'
+              end
+
+              # rotation
+              case xf.alignment.text_rotation
+              when nil
+                style.rotation = nil
+              when 0
+                style.rotation = 'None'
+              when 90
+                style.rotation = 'Left'
+              when 180
+                style.rotation = 'UpsideDown'
+              when 270
+                style.rotation = 'Right'
               end
 
             end

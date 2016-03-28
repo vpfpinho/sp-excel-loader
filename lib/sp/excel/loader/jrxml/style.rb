@@ -40,6 +40,7 @@ module Sp
           attr_accessor :is_italic
           attr_accessor :pen
           attr_accessor :box
+          attr_accessor :rotation
 
           def initialize (a_name)
             @name               = a_name
@@ -57,6 +58,7 @@ module Sp
             @is_italic          = nil
             @pen                = nil
             @box                = nil
+            @rotation           = nil
           end
 
           def to_xml (a_node)
@@ -76,6 +78,7 @@ module Sp
             attrs['isBlankWhenNull'] = @is_blank_when_null unless @is_blank_when_null.nil?
             attrs['isBold']          = @is_bold            unless @is_bold.nil?
             attrs['isItalic']        = @is_italic          unless @is_italic.nil?
+            attrs['rotation']        = @rotation           unless @rotation.nil?
 
             Nokogiri::XML::Builder.with(a_node) do |xml|
               xml.style(attrs)
