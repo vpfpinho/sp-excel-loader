@@ -29,7 +29,7 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map = nil)
+          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false)
             super(a_excel_filename)
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
@@ -64,7 +64,9 @@ module Sp
 
             end
 
-            @widget_factory    = WidgetFactory.new(a_fields_map)
+            @widget_factory             = WidgetFactory.new(a_fields_map)
+            @widget_factory.cb_editable = a_enable_cb_or_rb_edition
+            @widget_factory.rb_editable = a_enable_cb_or_rb_edition
 
             generate_styles()
 
