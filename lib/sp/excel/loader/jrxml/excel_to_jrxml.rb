@@ -49,15 +49,17 @@ module Sp
               a_fields_map = Hash.new
 
               # Load parameters config table if it exists
-              if respond_to?('params_def')
+              if respond_to?('params_def') and not params_def.nil?
                 params_def.each do |param|
+                  param.presentation = Presentation.new(param.presentation)
                   a_fields_map[param.id] = param
                 end
               end
 
               # Load fields config table if it exists
-              if respond_to?('fields_def')
+              if respond_to?('fields_def') and not fields_def.nil?
                 fields_def.each do |field|
+                  field.presentation = Presentation.new(field.presentation)
                   a_fields_map[field.id] = field
                 end
               end
@@ -174,8 +176,10 @@ module Sp
 
             # Alignment
             if xf.apply_alignment
+
+              #byebug if a_style_index == 111
               case xf.alignment.horizontal
-              when 'left'
+              when 'left', nil
                 style.h_text_align ='Left'
               when 'center'
                 style.h_text_align ='Center'
@@ -188,8 +192,22 @@ module Sp
                 style.v_text_align ='Top'
               when 'center'
                 style.v_text_align ='Middle'
-              when 'bottom'
+              when 'bottom', nil
                 style.v_text_align ='Bottom'
+              end
+
+              # rotation
+              case xf.alignment.text_rotation
+              when nil
+                style.rotation = nil
+              when 0
+                style.rotation = 'None'
+              when 90
+                style.rotation = 'Left'
+              when 180
+                style.rotation = 'UpsideDown'
+              when 270
+                style.rotation = 'Right'
               end
 
             end
@@ -371,10 +389,16 @@ module Sp
               @auto_float = a_row_tag.split(':')[1].strip == 'true'
             when /AutoStretch:.+/i
               @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
-            when /Report.isStartNewPage:.+/i
+            when /Report.isTitleStartNewPage:.+/i
               @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
             when /Band.splitType:.+/i
               @band_split_type = a_row_tag.split(':')[1].strip
+            when /Group.isStartNewPage:.+/i
+              @report.group ||= Group.new
+              @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
+            when /Group.isReprintHeaderOnEachPage:.+/i
+              @report.group ||= Group.new
+              @report.group.is_reprint_header_on_each_page = a_row_tag.split(':')[1].strip == 'true'
             when /BasicExpressions:.+i/
               @widget_factory.basic_expressions = a_row_tag.split(':')[1].strip == 'true'
             else
