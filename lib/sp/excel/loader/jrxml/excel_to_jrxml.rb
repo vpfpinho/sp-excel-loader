@@ -391,6 +391,12 @@ module Sp
               @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
             when /Band.splitType:.+/i
               @band_split_type = a_row_tag.split(':')[1].strip
+            when /Group.isStartNewPage:.+/i
+              @report.group ||= Group.new
+              @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
+            when /Group.isReprintHeaderOnEachPage:.+/i
+              @report.group ||= Group.new
+              @report.group.is_reprint_header_on_each_page = a_row_tag.split(':')[1].strip == 'true'
             when /BasicExpressions:.+i/
               @widget_factory.basic_expressions = a_row_tag.split(':')[1].strip == 'true'
             else
