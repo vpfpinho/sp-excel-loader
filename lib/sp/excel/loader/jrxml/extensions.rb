@@ -85,32 +85,38 @@ module Sp
 
         class Checkbox < Editable
 
-          def initialize (a_field_id, a_unchecked, a_checked, a_editable)
+          def initialize (a_field_id, a_type = nil, a_unchecked = nil, a_checked = nil)
             super(a_field_id)
-            @properties = [
-                            Property.new("epaper.casper.text.field.editable"                       , a_editable ? "true" : "false" ),
-                            Property.new("epaper.casper.text.field.editable.field_name"            , @field_id                     ),
-                            Property.new("epaper.casper.text.field.attach"                         , "checkbox"                    ),
-                            Property.new("epaper.casper.text.field.attach.checkbox.value.type"     , "Number"                      ),
-                            Property.new("epaper.casper.text.field.attach.checkbox.value.off"      , a_unchecked                   ),
-                            Property.new("epaper.casper.text.field.attach.checkbox.value.on"       , a_checked                     )
-                          ]
+            if nil == a_type || nil == a_unchecked || nil == a_checked
+              @properties = [
+                 Property.new("epaper.casper.text.field.editable"                  , "false"   ),
+                 Property.new("epaper.casper.text.field.editable.field_name"       , @field_id )
+              ]
+            else
+              @properties << Property.new("epaper.casper.text.field.attach"                    , "checkbox"  )
+              @properties << Property.new("epaper.casper.text.field.attach.checkbox.value.type", a_type      )
+              @properties << Property.new("epaper.casper.text.field.attach.checkbox.value.off" , a_unchecked )
+              @properties << Property.new("epaper.casper.text.field.attach.checkbox.value.on"  , a_checked   )
+            end
           end
 
         end
 
         class RadioButton < Editable
 
-          def initialize (a_field_id, a_unchecked, a_checked, a_editable)
+          def initialize (a_field_id, a_type = nil, a_unchecked = nil, a_checked = nil)
             super(a_field_id)
-            @properties = [
-                            Property.new("epaper.casper.text.field.editable"                       , a_editable ? "true" : "false" ),
-                            Property.new("epaper.casper.text.field.editable.field_name"            , @field_id                     ),
-                            Property.new("epaper.casper.text.field.attach"                         , "radio_button"                ),
-                            Property.new("epaper.casper.text.field.attach.radio_button.value.type" , "Number"                      ),
-                            Property.new("epaper.casper.text.field.attach.radio_button.value.off"  , a_unchecked                   ),
-                            Property.new("epaper.casper.text.field.attach.radio_button.value.on"   , a_checked                     )
-                          ]
+            if nil == a_type || nil == a_unchecked || nil == a_checked
+              @properties = [
+                              Property.new("epaper.casper.text.field.editable"                       , "false"   ),
+                              Property.new("epaper.casper.text.field.editable.field_name"            , @field_id )
+                            ]
+            else
+              @properties << Property.new("epaper.casper.text.field.attach"                        , "radio_button" )
+              @properties << Property.new("epaper.casper.text.field.attach.radio_button.value.type", a_type         )
+              @properties << Property.new("epaper.casper.text.field.attach.radio_button.value.off" , a_unchecked    )
+              @properties << Property.new("epaper.casper.text.field.attach.radio_button.value.on"  , a_checked      )
+            end
           end
 
         end
@@ -260,9 +266,20 @@ module Sp
 
           def new_checkbox(a_config)
             # check box: $CB{<field_name>,<unchecked>,<checked>}
-            cb          = a_config[4..-2].split(',')
+            cb = a_config[4..-2].split(',')
+            cb[0].strip!
             is_editable = @cb_editable && @fields_map.has_key?(cb[0]) && @fields_map[cb[0]].editable 
-            editable    = Checkbox.new(a_id=cb[0], a_unchecked=cb[1], a_checked=cb[2], a_editable=is_editable)
+            if is_editable
+              unchecked = cb[1].strip
+              checked   = cb[2].strip
+              if unchecked.start_with?('"') or checked.start_with?('"')
+                unchecked = unchecked.gsub(/\A"/, '').gsub!(/"\z/, '')
+                checked   = checked.gsub(/\A"/, '').gsub!(/"\z/, '')
+              end
+              editable  = Checkbox.new(a_field_id=cb[0], a_type=@fields_map[cb[0]].java_class, a_unchecked=unchecked, a_checked=checked)
+            else
+              editable = Checkbox.new(a_field_id=cb[0])
+            end
             widget      = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
             if @basic_expressions
               widget.text_field_expression = "IF(#{cb[0]}==#{cb[2]};\"X\";\"\")"
@@ -274,9 +291,20 @@ module Sp
 
           def new_radio_button(a_config)
             # check box: $RB{<field_name>,<unchecked>,<checked>}
-            rb          = a_config[4..-2].split(',')
+            rb = a_config[4..-2].split(',')
+            rb[0].strip!
             is_editable = @rb_editable && @fields_map.has_key?(rb[0]) && @fields_map[rb[0]].editable 
-            editable    = RadioButton.new(a_id=rb[0], a_unchecked=rb[1], a_checked=rb[2], a_editable=is_editable)
+            if is_editable
+              unchecked = rb[1].strip
+              checked   = rb[2].strip
+              if unchecked.start_with?('"') or checked.start_with?('"')
+                unchecked = unchecked.gsub(/\A"/, '').gsub!(/"\z/, '')
+                checked   = checked.gsub(/\A"/, '').gsub!(/"\z/, '')
+              end
+              editable  = RadioButton.new(a_field_id=rb[0], a_type=@fields_map[rb[0]].java_class, a_unchecked=unchecked, a_checked=checked)
+            else
+              editable = RadioButton.new(a_field_id=rb[0])
+            end
             widget      = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
             if @basic_expressions
               widget.text_field_expression = "IF(#{rb[0]}==#{rb[2]};\"X\";\"\")"

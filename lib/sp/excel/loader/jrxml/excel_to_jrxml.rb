@@ -29,20 +29,21 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false)
+          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, a_detail_band_patch_attr_name = nil)
             super(a_excel_filename)
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
             @report = JasperReport.new(report_name)
-            @current_band            = nil
-            @first_row_in_band       = 0
-            @band_type               = nil
-            @v_scale                 = 1
-            @detail_cols_auto_height = false
-            @auto_float              = false
-            @auto_stretch            = false
-            @band_split_type         = nil
-            @basic_expressions       = false
+            @current_band                = nil
+            @first_row_in_band           = 0
+            @band_type                   = nil
+            @v_scale                     = 1
+            @detail_cols_auto_height     = false
+            @auto_float                  = false
+            @auto_stretch                = false
+            @band_split_type             = nil
+            @basic_expressions           = false
+            @detail_band_patch_attr_name = a_detail_band_patch_attr_name
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
@@ -332,7 +333,9 @@ module Sp
               @band_type = a_row_tag
             when /DT\d*/
               @current_band = Band.new
-              @current_band.properties = [ Property.new("epaper.casper.band.patch.op.add.attribute.name", "data_row_type") ]
+              if nil != @detail_band_patch_attr_name
+                @current_band.properties = [ Property.new("epaper.casper.band.patch.op.add.attribute.name", @detail_band_patch_attr_name) ]
+              end
               if @report.detail.nil?
                 @report.detail = Detail.new
                 @report.band_containers << @report.detail

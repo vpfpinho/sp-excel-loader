@@ -156,6 +156,11 @@ module Sp
               else
                 value = nil
               end
+              if value.kind_of?(String)
+                value.gsub!(/\A\u00A0+/, '')
+                value.gsub!(/\u00A0+\z/, '')
+                value.strip!
+              end
               record.add_attr(a_worksheet[header_row][col].value, value)
             end
             records << record
