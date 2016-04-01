@@ -241,16 +241,23 @@ module Sp
               editable = nil
             end
 
-            if @fields_map.has_key?(a_id) and not @fields_map[a_id].presentation.nil? and @fields_map[a_id].presentation.format != ''
-              pattern = @fields_map[a_id].presentation.format
-            else
-              pattern = nil
-            end
+            if @fields_map.has_key?(a_id) and @fields_map[a_id].widget == 'Client Combo'
 
-            if editable.nil?
-              widget = TextField.new(a_properties = nil, a_pattern = pattern, a_pattern_expression = nil)
+              widget = ClientComboTextField.new(@fields_map[a_id])
+
             else
-              widget = TextField.new(a_properties = editable.properties, a_pattern = pattern, a_pattern_expression = nil)
+
+              if @fields_map.has_key?(a_id) and not @fields_map[a_id].presentation.nil? and @fields_map[a_id].presentation.format != ''
+                pattern = @fields_map[a_id].presentation.format
+              else
+                pattern = nil
+              end
+
+              if editable.nil?
+                widget = TextField.new(a_properties = nil, a_pattern = pattern, a_pattern_expression = nil)
+              else
+                widget = TextField.new(a_properties = editable.properties, a_pattern = pattern, a_pattern_expression = nil)
+              end
             end
             widget
           end
@@ -268,7 +275,7 @@ module Sp
             # check box: $CB{<field_name>,<unchecked>,<checked>}
             cb = a_config[4..-2].split(',')
             cb[0].strip!
-            is_editable = @cb_editable && @fields_map.has_key?(cb[0]) && @fields_map[cb[0]].editable 
+            is_editable = @cb_editable && @fields_map.has_key?(cb[0]) && @fields_map[cb[0]].editable
             if is_editable
               unchecked = cb[1].strip
               checked   = cb[2].strip
@@ -293,7 +300,7 @@ module Sp
             # check box: $RB{<field_name>,<unchecked>,<checked>}
             rb = a_config[4..-2].split(',')
             rb[0].strip!
-            is_editable = @rb_editable && @fields_map.has_key?(rb[0]) && @fields_map[rb[0]].editable 
+            is_editable = @rb_editable && @fields_map.has_key?(rb[0]) && @fields_map[rb[0]].editable
             if is_editable
               unchecked = rb[1].strip
               checked   = rb[2].strip
