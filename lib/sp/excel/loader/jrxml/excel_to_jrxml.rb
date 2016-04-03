@@ -380,6 +380,18 @@ module Sp
               @report.paper_size = a_row_tag.split(':')[1].strip
               @report.update_page_size()
               @px_width = @report.page_width - @report.left_margin - @report.right_margin
+            when /Report.isTitleStartNewPage:.+/i
+              @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
+            when /Report.LeftMargin:.+/i
+              @report.left_margin =  a_row_tag.split(':')[1].strip.to_i
+              @px_width = @report.page_width - @report.left_margin - @report.right_margin
+            when /Report.RightMargin:.+/i
+              @report.right_margin =  a_row_tag.split(':')[1].strip.to_i
+              @px_width = @report.page_width - @report.left_margin - @report.right_margin
+            when /Report.TopMargin:.+/i
+              @report.top_margin =  a_row_tag.split(':')[1].strip.to_i
+            when /Report.BottomMargin:.+/i
+              @report.bottom_margin =  a_row_tag.split(':')[1].strip.to_i
             when /VScale:.+/i
               @v_scale = a_row_tag.split(':')[1].strip.to_f
             when /Query:.+/i
@@ -392,8 +404,6 @@ module Sp
               @auto_float = a_row_tag.split(':')[1].strip == 'true'
             when /AutoStretch:.+/i
               @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
-            when /Report.isTitleStartNewPage:.+/i
-              @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
             when /Band.splitType:.+/i
               @band_split_type = a_row_tag.split(':')[1].strip
             when /Group.isStartNewPage:.+/i
