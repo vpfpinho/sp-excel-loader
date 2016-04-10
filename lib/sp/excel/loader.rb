@@ -42,6 +42,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'c
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'report_element'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'jasper'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'property'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'property_expression'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'extensions'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'version'))
 

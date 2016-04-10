@@ -233,7 +233,7 @@ module Sp
             @rb_editable = false
           end
 
-          def new_for_field (a_id)
+          def new_for_field (a_id, a_generator)
 
             if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)
               editable = @fields_map.has_key?(a_id) && @fields_map[a_id].editable ? Editable.new(a_id) : nil
@@ -243,7 +243,7 @@ module Sp
 
             if @fields_map.has_key?(a_id) and @fields_map[a_id].widget == 'Client Combo'
 
-              widget = ClientComboTextField.new(@fields_map[a_id])
+              widget = ClientComboTextField.new(@fields_map[a_id], a_generator)
 
             else
 

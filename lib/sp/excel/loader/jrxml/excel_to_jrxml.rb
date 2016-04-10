@@ -29,7 +29,7 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, a_detail_band_patch_attr_name = nil)
+          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false)
             super(a_excel_filename)
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
@@ -43,7 +43,6 @@ module Sp
             @auto_stretch                = false
             @band_split_type             = nil
             @basic_expressions           = false
-            @detail_band_patch_attr_name = a_detail_band_patch_attr_name
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
@@ -333,9 +332,6 @@ module Sp
               @band_type = a_row_tag
             when /DT\d*/
               @current_band = Band.new
-              if nil != @detail_band_patch_attr_name
-                @current_band.properties = [ Property.new("epaper.casper.band.patch.op.add.attribute.name", @detail_band_patch_attr_name) ]
-              end
               if @report.detail.nil?
                 @report.detail = Detail.new
                 @report.band_containers << @report.detail
@@ -399,13 +395,13 @@ module Sp
             when /Id:.+/i
               @report.id = a_row_tag.split(':')[1].strip
             when /DetailColsAutoHeight:.+/i
-              @detail_cols_auto_height = a_row_tag.split(':')[1].strip == 'true'
+              @detail_cols_auto_height = a_row_tag.split(':')[1].strip == 'true' # TODO per band??
             when /AutoFloat:.+/i
-              @auto_float = a_row_tag.split(':')[1].strip == 'true'
+              @auto_float = a_row_tag.split(':')[1].strip == 'true' # TODO per band??
             when /AutoStretch:.+/i
-              @auto_stretch = a_row_tag.split(':')[1].strip == 'true'
+              @auto_stretch = a_row_tag.split(':')[1].strip == 'true'  # TODO per band??
             when /Band.splitType:.+/i
-              @band_split_type = a_row_tag.split(':')[1].strip
+              @band_split_type = a_row_tag.split(':')[1].strip  # TODO per band?
             when /Group.isStartNewPage:.+/i
               @report.group ||= Group.new
               @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
@@ -423,10 +419,19 @@ module Sp
 
               @worksheet.comments[0].comment_list.each do |comment|
                 if comment.ref.col_range.begin == 0 && comment.ref.row_range.begin == a_row
-                  text = comment.text.to_s
-                  if text.start_with? 'PE:'
-                    if @current_band.print_when_expression.nil?
-                      @current_band.print_when_expression = text[3..-1].strip
+                  comment.text.to_s.lines.each do |text|
+                    text.strip!
+                    next if text == ''
+                    tag, value =  text.split(':')
+                    tag.strip!
+                    value.strip!
+                    if tag == 'PE'
+                      if @current_band.print_when_expression.nil?
+                        @current_band.print_when_expression = text[3..-1].strip
+                      end
+                    elsif tag == 'Band.lineParentIdField'
+                      @current_band.properties ||= Array.new
+                      @current_band.properties  << Property.new("epaper.casper.band.patch.op.add.attribute.name", value)
                     end
                   end
                 end
@@ -572,7 +577,7 @@ module Sp
 
               # parameter
               f_id                     = a_expression.strip
-              rv                       = @widget_factory.new_for_field(f_id)
+              rv                       = @widget_factory.new_for_field(f_id, self)
               rv.text_field_expression = a_expression
 
               add_parameter(f_id, m[1])
@@ -581,7 +586,7 @@ module Sp
 
               # field
               f_id                     = a_expression.strip
-              rv                       = @widget_factory.new_for_field(f_id)
+              rv                       = @widget_factory.new_for_field(f_id, self)
               rv.text_field_expression = a_expression
 
               add_field(f_id.strip, m[1])
@@ -590,7 +595,7 @@ module Sp
 
               # variable
               f_id                     = a_expression.strip
-              rv                       = @widget_factory.new_for_field(f_id)
+              rv                       = @widget_factory.new_for_field(f_id, self)
               rv.text_field_expression = a_expression
 
               add_variable(f_id, m[1])

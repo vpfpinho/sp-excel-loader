@@ -25,7 +25,7 @@ module Sp
 
         class ClientComboTextField < TextField
 
-          def initialize (a_binding)
+          def initialize (a_binding, a_generator)
             super(Array.new, a_binding.presentation.format, nil)
 
             @report_element.properties << Property.new('epaper.casper.text.field.editable'                                            , 'true')
@@ -38,6 +38,10 @@ module Sp
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
             @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                          , a_binding.id[3..-2])
             @report_element.properties << Property.new('epaper.casper.text.field.patch.type'                                          , a_binding.java_class)
+            unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
+              @report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', a_binding.tooltip)
+              a_generator.declare_expression_entities(a_binding.tooltip)
+            end
 
           end
 
