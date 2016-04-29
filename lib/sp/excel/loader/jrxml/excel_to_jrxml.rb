@@ -423,6 +423,7 @@ module Sp
                     text.strip!
                     next if text == ''
                     tag, value =  text.split(':')
+                    next if value.nil? || tag.nil?
                     tag.strip!
                     value.strip!
                     if tag == 'PE'
