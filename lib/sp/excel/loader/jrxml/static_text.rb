@@ -32,10 +32,10 @@ module Sp
           attr_accessor :attributes
 
           def initialize
-            @report_element = ReportElement.new
-            @text           = ''
-            @box            = nil
-            @attributes     = nil
+            @report_element        = ReportElement.new
+            @text                  = ''
+            @box                   = nil
+            @attributes            = nil
           end
 
           def to_xml (a_node)

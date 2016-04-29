@@ -33,16 +33,18 @@ module Sp
           attr_accessor :properties
           attr_accessor :position_type
           attr_accessor :stretch_type
+          attr_accessor :print_when_expression
 
           def initialize
-            @x             = 0
-            @y             = 0
-            @width         = 0
-            @height        = 0
-            @style         = nil
-            @properties    = nil
-            @position_type = 'FixRelativeToTop'
-            @stretch_type  = 'NoStretch'
+            @x                     = 0
+            @y                     = 0
+            @width                 = 0
+            @height                = 0
+            @style                 = nil
+            @properties            = nil
+            @position_type         = 'FixRelativeToTop'
+            @stretch_type          = 'NoStretch'
+            @print_when_expression = nil
           end
 
           def attributes
@@ -60,6 +62,13 @@ module Sp
           def to_xml (a_node)
             Nokogiri::XML::Builder.with(a_node) do |xml|
               xml.reportElement(attributes)
+              unless @print_when_expression.nil?
+                Nokogiri::XML::Builder.with(a_node.children.last) do |xml|
+                  xml.printWhenExpression {
+                    xml.cdata(@print_when_expression)
+                  }
+                end
+              end
               if not @properties.nil?
                 @properties.each do |property|
                   property.to_xml(a_node.children.last)

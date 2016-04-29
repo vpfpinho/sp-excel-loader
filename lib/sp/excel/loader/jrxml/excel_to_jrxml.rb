@@ -466,6 +466,8 @@ module Sp
                 field.report_element.height = cell_height
                 field.report_element.style  = 'style_' + (row[col_idx].style_index + 1).to_s
 
+                process_field_comments(a_row_idx, col_idx, field)
+
                 if @band_type.match(/DT\d*:/)
                   @current_band.split_type = 'Immediate' if @band_split_type.nil?
                   if @detail_cols_auto_height
@@ -688,6 +690,27 @@ module Sp
               end
             }
             nil
+          end
+
+          def process_field_comments (a_row, a_col, a_field)
+
+            if @worksheet.comments != nil && @worksheet.comments.size > 0 && @worksheet.comments[0].comment_list != nil
+
+              @worksheet.comments[0].comment_list.each do |comment|
+                if comment.ref.col_range.begin == a_col && comment.ref.row_range.begin == a_row
+                  comment.text.to_s.lines.each do |text|
+                    text.strip!
+                    next if text == ''
+                    tag, value =  text.split(':')
+                    tag.strip!
+                    value.strip!
+                    if tag == 'PE'
+                      a_field.report_element.print_when_expression = text[3..-1].strip
+                    end
+                  end
+                end
+              end
+            end
           end
 
           def transform_expression (a_expression)
