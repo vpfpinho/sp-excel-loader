@@ -241,7 +241,7 @@ module Sp
               editable = nil
             end
 
-            if @fields_map.has_key?(a_id) and @fields_map[a_id].widget == 'Client Combo'
+            if @fields_map.has_key?(a_id) and @fields_map[a_id].respond_to?(:widget) and @fields_map[a_id].widget == 'Client Combo'
 
               widget = ClientComboTextField.new(@fields_map[a_id], a_generator)
 

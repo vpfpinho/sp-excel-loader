@@ -625,49 +625,59 @@ module Sp
 
             elsif a_expression.match(/^\$CB{/)
 
-                # checkbox
-                checkbox = @widget_factory.new_checkbox(a_expression.strip)
-                declare_expression_entities(a_expression.strip)
-                rv = checkbox[:widget]
+              # checkbox
+              checkbox = @widget_factory.new_checkbox(a_expression.strip)
+              declare_expression_entities(a_expression.strip)
+              rv = checkbox[:widget]
 
             elsif a_expression.match(/^\$RB{/)
 
-                # radio button
-                declare_expression_entities(a_expression.strip)
-                radio_button = @widget_factory.new_radio_button(a_expression.strip)
-                rv = radio_button[:widget]
+              # radio button
+              declare_expression_entities(a_expression.strip)
+              radio_button = @widget_factory.new_radio_button(a_expression.strip)
+              rv = radio_button[:widget]
 
             elsif a_expression.match(/^\$DE{/)
 
-                declare_expression_entities(a_expression.strip)
-                de = a_expression.strip.split(',')
-                de[0] = de[0][4..de[0].length-1]
-                de[1] = de[1][0..de[1].length-2]
+              declare_expression_entities(a_expression.strip)
+              de = a_expression.strip.split(',')
+              de[0] = de[0][4..de[0].length-1]
+              de[1] = de[1][0..de[1].length-2]
 
-                properties = [
-                                Property.new("epaper.casper.text.field.editable", "false"),
-                                Property.new("epaper.casper.text.field.editable.field_name", de[0][3..de[0].length-2])
-                             ]
+              properties = [
+                              Property.new("epaper.casper.text.field.editable", "false"),
+                              Property.new("epaper.casper.text.field.editable.field_name", de[0][3..de[0].length-2])
+                           ]
 
-                rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = de[1]
+              rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
+              rv.text_field_expression = de[1]
 
             elsif a_expression.match(/^\$SE{/)
 
-                declare_expression_entities(a_expression.strip)
+              declare_expression_entities(a_expression.strip)
+              expression = a_expression.strip
+              rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+              rv.text_field_expression = expression[4..expression.length-2]
+
+            elsif a_expression.match(/^\$I{/)
+
+              rv = Image.new()
+              unless a_expression.nil?
                 expression = a_expression.strip
-                rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = expression[4..expression.length-2]
+                rv.image_expression = transform_expression(expression[3..expression.length-2])
+              end
 
             elsif a_expression.include? '$P{' or a_expression.include? '$F{' or a_expression.include? '$V{'
 
-                a_expression = transform_expression(a_expression)
-                rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = a_expression.strip
+              a_expression = transform_expression(a_expression)
+              rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+              rv.text_field_expression = a_expression.strip
 
             else
-                rv = StaticText.new
-                rv.text = a_expression
+
+              rv = StaticText.new
+              rv.text = a_expression
+
             end
 
             return rv
