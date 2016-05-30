@@ -64,6 +64,20 @@ module Sp
                 end
               end
 
+              # Load variable definition table if it exists
+              if respond_to? ('variables_def') and not variables_def.nil?
+                variables_def.each do |vdef|
+                  next if vdef.name.nil? or vdef.name.empty?
+                  variable = Variable.new(vdef.name)
+                  variable.java_class               = vdef.java_class         unless vdef.java_class.nil? or vdef.java_class.empty?
+                  variable.calculation              = vdef.calculation        unless vdef.calculation.nil? or vdef.calculation.empty?
+                  variable.reset_type               = vdef.reset              unless vdef.reset.nil? or vdef.reset.empty?
+                  variable.variable_expression      = vdef.expression         unless vdef.expression.nil? or vdef.expression.empty?
+                  variable.initial_value_expression = vdef.initial_expression unless vdef.initial_expression.nil? or vdef.initial_expression.empty?
+                  @report.variables[vdef.name] = variable
+                end
+              end
+
             end
 
             @widget_factory             = WidgetFactory.new(a_fields_map)
@@ -378,15 +392,15 @@ module Sp
               @px_width = @report.page_width - @report.left_margin - @report.right_margin
             when /Report.isTitleStartNewPage:.+/i
               @report.is_title_new_page =  a_row_tag.split(':')[1].strip == 'true'
-            when /Report.LeftMargin:.+/i
+            when /Report.leftMargin:.+/i
               @report.left_margin =  a_row_tag.split(':')[1].strip.to_i
               @px_width = @report.page_width - @report.left_margin - @report.right_margin
-            when /Report.RightMargin:.+/i
+            when /Report.rightMargin:.+/i
               @report.right_margin =  a_row_tag.split(':')[1].strip.to_i
               @px_width = @report.page_width - @report.left_margin - @report.right_margin
-            when /Report.TopMargin:.+/i
+            when /Report.topMargin:.+/i
               @report.top_margin =  a_row_tag.split(':')[1].strip.to_i
-            when /Report.BottomMargin:.+/i
+            when /Report.bottomMargin:.+/i
               @report.bottom_margin =  a_row_tag.split(':')[1].strip.to_i
             when /VScale:.+/i
               @v_scale = a_row_tag.split(':')[1].strip.to_f
@@ -394,14 +408,6 @@ module Sp
               @report.query_string = a_row_tag.split(':')[1].strip
             when /Id:.+/i
               @report.id = a_row_tag.split(':')[1].strip
-            when /DetailColsAutoHeight:.+/i
-              @detail_cols_auto_height = a_row_tag.split(':')[1].strip == 'true' # TODO per band??
-            when /AutoFloat:.+/i
-              @auto_float = a_row_tag.split(':')[1].strip == 'true' # TODO per band??
-            when /AutoStretch:.+/i
-              @auto_stretch = a_row_tag.split(':')[1].strip == 'true'  # TODO per band??
-            when /Band.splitType:.+/i
-              @band_split_type = a_row_tag.split(':')[1].strip  # TODO per band?
             when /Group.isStartNewPage:.+/i
               @report.group ||= Group.new
               @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
@@ -426,19 +432,31 @@ module Sp
                     next if value.nil? || tag.nil?
                     tag.strip!
                     value.strip!
-                    if tag == 'PE'
+                    if tag == 'PE' or tag == 'printWhenExpression'
                       if @current_band.print_when_expression.nil?
-                        @current_band.print_when_expression = text[3..-1].strip
+                        @current_band.print_when_expression = value
                       end
-                    elsif tag == 'Band.lineParentIdField'
+                    elsif tag == 'lineParentIdField'
                       @current_band.properties ||= Array.new
                       @current_band.properties  << Property.new("epaper.casper.band.patch.op.add.attribute.name", value)
+                    elsif tag == 'AF' or tag == 'autoFloat'
+                      @current_band.auto_float = to_b(value)
+                    elsif tag == 'AS' or tag == 'autoStretch'
+                      @current_band.auto_stretch = to_b(value)
+                    elsif tag == 'splitType'
+                      @current_band.split_type = value
+                    elsif tag == 'stretchType'
+                      @current_band.stretch_type = value
                     end
                   end
                 end
               end
             end
 
+          end
+
+          def to_b (a_value)
+            a_value.match(/(true|t|yes|y|1)$/i) != nil
           end
 
           def generate_band_content (a_row_idx)
@@ -448,7 +466,6 @@ module Sp
             max_cell_height = 0
             col_idx         = 1
 
-            @current_band.split_type = @band_split_type unless @band_split_type.nil?
             while col_idx < row.size do
 
               col_span, row_span, cell_width, cell_height = measure_cell(a_row_idx, col_idx)
@@ -469,20 +486,19 @@ module Sp
 
                 process_field_comments(a_row_idx, col_idx, field)
 
-                if @band_type.match(/DT\d*:/)
-                  @current_band.split_type = 'Immediate' if @band_split_type.nil?
-                  if @detail_cols_auto_height
-                    field.report_element.stretch_type = 'RelativeToBandHeight'
-                  end
+                if @current_band.stretch_type
+                  field.report_element.stretch_type = @current_band.stretch_type
                 end
 
-                if @auto_float and field.report_element.y != 0
+                if @current_band.auto_float and field.report_element.y != 0
                   field.report_element.position_type = 'Float'
                 end
 
-                if @auto_stretch and field.respond_to?('is_stretch_with_overflow')
+                if @current_band.auto_stretch and field.respond_to?('is_stretch_with_overflow')
                   field.is_stretch_with_overflow = true
                 end
+
+                # overide here with field by field directives
 
                 # If the field is from a horizontally merged cell we need to check the right side border
                 if col_span > 1

@@ -38,6 +38,8 @@ module Sp
             @java_class ||= 'java.lang.String'
             @calculation  = 'System'
             @reset_type   = nil
+            @variable_expression = nil
+            @initial_value_expression = nil
           end
 
           def attributes
@@ -45,7 +47,8 @@ module Sp
             rv['name']        = @name
             rv['class']       = @java_class
             rv['calculation'] = @calculation
-            rv['reset_type']  = @reset_type unless @reset_type.nil?
+            rv['resetType']   = @reset_type unless @reset_type.nil? or @reset_type != 'None'
+            rv['resetGroup']  = 'Group1' if @reset_type == 'Group'
             return rv
           end
 

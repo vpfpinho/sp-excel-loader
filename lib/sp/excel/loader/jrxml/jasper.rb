@@ -63,7 +63,7 @@ module Sp
             # init data set
             @group           = nil
             @detail          = nil
-            @query_string    = nil
+            @query_string    = 'lines'
             @parameters      = Hash.new
             @fields          = Hash.new
             @variables       = Hash.new
@@ -72,7 +72,7 @@ module Sp
             @band_containers = Array.new
 
             # defaults for jasper report attributes
-            @orientation       = 'Landscape'
+            @orientation       = 'Portrait'
             @paper_size        = 'A4'
             @page_width        = 595
             @page_height       = 842

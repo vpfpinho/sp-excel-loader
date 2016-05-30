@@ -30,6 +30,9 @@ module Sp
           attr_accessor :split_type
           attr_accessor :print_when_expression
           attr_accessor :properties
+          attr_accessor :auto_float
+          attr_accessor :auto_stretch
+          attr_accessor :stretch_type
 
           def initialize
             @children              = Array.new
@@ -37,6 +40,9 @@ module Sp
             @split_type            = 'Prevent'
             @print_when_expression = nil
             @properties            = nil
+            @auto_stretch          = false
+            @auto_float            = false
+            @stretch_type          = nil
           end
 
           def attributes
