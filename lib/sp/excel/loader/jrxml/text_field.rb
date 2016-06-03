@@ -27,11 +27,13 @@ module Sp
 
           attr_accessor :text_field_expression
           attr_accessor :is_stretch_with_overflow
+          attr_accessor :is_blank_when_null
           attr_accessor :pattern
 
           def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()
             @text_field_expression     = nil
+            @is_blank_when_null        = nil
             @is_stretch_with_overflow  = false
             @pattern                   = a_pattern
             @pattern_expression        = a_pattern_expression
@@ -42,6 +44,7 @@ module Sp
             rv = Hash.new
             rv['isStretchWithOverflow'] = true if @is_stretch_with_overflow
             rv['pattern']               = @pattern unless @pattern.nil?
+            rv['isBlankWhenNull']       = @is_blank_when_null unless @is_blank_when_null.nil?
             return rv
           end
 

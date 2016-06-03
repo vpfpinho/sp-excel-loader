@@ -484,7 +484,6 @@ module Sp
                 field.report_element.height = cell_height
                 field.report_element.style  = 'style_' + (row[col_idx].style_index + 1).to_s
 
-                process_field_comments(a_row_idx, col_idx, field)
 
                 if @current_band.stretch_type
                   field.report_element.stretch_type = @current_band.stretch_type
@@ -499,6 +498,8 @@ module Sp
                 end
 
                 # overide here with field by field directives
+                process_field_comments(a_row_idx, col_idx, field)
+
 
                 # If the field is from a horizontally merged cell we need to check the right side border
                 if col_span > 1
@@ -731,10 +732,23 @@ module Sp
                     tag, value =  text.split(':')
                     tag.strip!
                     value.strip!
-                    if tag == 'PE'
-                      a_field.report_element.print_when_expression = text[3..-1].strip
+                    puts "#{tag} => #{value}"
+
+                    if tag == 'PE' or tag == 'printWhenExpression'
+                      a_field.report_element.print_when_expression = value[3..-1].strip
+                    elsif tag == 'AF' or tag == 'autoFloat'
+                      a_field.report_element.position_type = to_b(value) ? 'Float' : 'FixRelativeToTop'
+                    elsif tag == 'AS' or tag == 'autoStretch' and a_field.respond_to?(:is_stretch_with_overflow)
+                      a_field.is_stretch_with_overflow = to_b(value)
+                    elsif tag == 'ST' or tag == 'stretchType'
+                      a_field.report_element.stretch_type = value
+                    elsif tag == 'BN' or tag == 'blankIfNull' and a_field.respond_to?(:is_blank_when_null)
+                      a_field.is_blank_when_null = to_b(value)
+                    elsif tag == 'PT' or tag == 'pattern' and a_field.respond_to?(:pattern)
+                      a_field.pattern = value
                     end
                   end
+
                 end
               end
             end
