@@ -26,6 +26,8 @@ module Sp
         class Image < StaticText
 
           attr_accessor :image_expression
+          attr_accessor :h_align
+          attr_accessor :v_align
 
           def initialize
             super()

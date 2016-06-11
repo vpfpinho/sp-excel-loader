@@ -278,9 +278,32 @@ module Sp
           def convert_color (a_xls_color)
             if a_xls_color.indexed.nil?
               if a_xls_color.theme != nil
-                #byebug
-                puts  "Color from theme #{a_xls_color.theme} #{a_xls_color.tint}"
-                return '#c0c0c0'
+                cs = @workbook.theme.a_theme_elements.a_clr_scheme
+                case a_xls_color.theme
+                when 0
+                  return tint_theme_color(cs.a_lt1, a_xls_color.tint)
+                when 1
+                  return tint_theme_color(cs.a_dk1, a_xls_color.tint)
+                when 2
+                  return tint_theme_color(cs.a_lt2, a_xls_color.tint)
+                when 3
+                  return tint_theme_color(cs.a_dk2, a_xls_color.tint)
+                when 4
+                  return tint_theme_color(cs.a_accent1, a_xls_color.tint)
+                when 5
+                  return tint_theme_color(cs.a_accent2, a_xls_color.tint)
+                when 6
+                  return tint_theme_color(cs.a_accent3, a_xls_color.tint)
+                when 7
+                  return tint_theme_color(cs.a_accent4, a_xls_color.tint)
+                when 8
+                  return tint_theme_color(cs.a_accent5, a_xls_color.tint)
+                when 9
+                  return tint_theme_color(cs.a_accent6, a_xls_color.tint)
+                else
+                  return '#c0c0c0'
+                end
+
               elsif a_xls_color.auto or a_xls_color.rgb.nil?
                 return '#000000'
               else
@@ -289,6 +312,31 @@ module Sp
             else
               return "#INDEXED TODO"
             end
+          end
+
+          def tint_theme_color (a_color, a_tint)
+            color   = a_color.a_sys_clr.last_clr unless a_color.a_sys_clr.nil?
+            color ||= a_color.a_srgb_clr.val
+            r = color[0..1].to_i(16)
+            g = color[2..3].to_i(16)
+            b = color[4..5].to_i(16)
+            unless a_tint.nil?
+              if ( a_tint <  0 )
+                a_tint = 1 + a_tint;
+                r = r * a_tint
+                g = g * a_tint
+                b = b * a_tint
+              else
+                r = r + (a_tint * (255 - r))
+                g = g + (a_tint * (255 - g))
+                b = b + (a_tint * (255 - b))
+              end
+            end
+            r = 255 if r > 255
+            g = 255 if g > 255
+            b = 255 if b > 255
+            color = "#%02X%02X%02X" % [r, g, b]
+            color
           end
 
           def parse_sheets
@@ -477,7 +525,7 @@ module Sp
                   next
                 end
 
-                field = create_field(row[col_idx].value.to_s)
+                field = create_field(row[col_idx])
                 field.report_element.x = x_for_column(col_idx)
                 field.report_element.y = y_for_row(a_row_idx)
                 field.report_element.width  = cell_width
@@ -590,40 +638,40 @@ module Sp
             return false
           end
 
-          def create_field (a_expression)
+          def create_field (a_cell)
 
-
-            if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
+            expression = a_cell.value.to_s
+            if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
               # parameter
-              f_id                     = a_expression.strip
+              f_id                     = expression.strip
               rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = a_expression
+              rv.text_field_expression = expression
 
               add_parameter(f_id, m[1])
 
-            elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
               # field
-              f_id                     = a_expression.strip
+              f_id                     = expression.strip
               rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = a_expression
+              rv.text_field_expression = expression
 
               add_field(f_id.strip, m[1])
 
-            elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
               # variable
-              f_id                     = a_expression.strip
+              f_id                     = expression.strip
               rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = a_expression
+              rv.text_field_expression = expression
 
               add_variable(f_id, m[1])
 
-            elsif ! (m = /\A\$C{(.+)}\z/.match a_expression.strip).nil?
+            elsif ! (m = /\A\$C{(.+)}\z/.match expression.strip).nil?
 
               # combo
-              combo = @widget_factory.new_combo(a_expression.strip)
+              combo = @widget_factory.new_combo(expression.strip)
               rv    = combo[:widget]
               f_id  = combo[:field]
               f_nm  = f_id[3..f_id.length-2]
@@ -640,24 +688,24 @@ module Sp
 
               rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"name\")"
 
-            elsif a_expression.match(/^\$CB{/)
+            elsif expression.match(/^\$CB{/)
 
               # checkbox
-              checkbox = @widget_factory.new_checkbox(a_expression.strip)
-              declare_expression_entities(a_expression.strip)
+              checkbox = @widget_factory.new_checkbox(expression.strip)
+              declare_expression_entities(expression.strip)
               rv = checkbox[:widget]
 
-            elsif a_expression.match(/^\$RB{/)
+            elsif expression.match(/^\$RB{/)
 
               # radio button
-              declare_expression_entities(a_expression.strip)
-              radio_button = @widget_factory.new_radio_button(a_expression.strip)
+              declare_expression_entities(expression.strip)
+              radio_button = @widget_factory.new_radio_button(expression.strip)
               rv = radio_button[:widget]
 
-            elsif a_expression.match(/^\$DE{/)
+            elsif expression.match(/^\$DE{/)
 
-              declare_expression_entities(a_expression.strip)
-              de = a_expression.strip.split(',')
+              declare_expression_entities(expression.strip)
+              de = expression.strip.split(',')
               de[0] = de[0][4..de[0].length-1]
               de[1] = de[1][0..de[1].length-2]
 
@@ -669,31 +717,37 @@ module Sp
               rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
               rv.text_field_expression = de[1]
 
-            elsif a_expression.match(/^\$SE{/)
+            elsif expression.match(/^\$SE{/)
 
-              declare_expression_entities(a_expression.strip)
-              expression = a_expression.strip
+              declare_expression_entities(expression.strip)
+              expression = expression.strip
               rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
               rv.text_field_expression = expression[4..expression.length-2]
 
-            elsif a_expression.match(/^\$I{/)
+            elsif expression.match(/^\$I{/)
 
               rv = Image.new()
-              unless a_expression.nil?
-                expression = a_expression.strip
+
+              # copy cell alignment to image
+              style = @report.styles['style_' + (a_cell.style_index + 1).to_s]
+              rv.v_align = style.v_text_align
+              rv.h_align = style.h_text_align
+
+              unless expression.nil?
+                expression = expression.strip
                 rv.image_expression = transform_expression(expression[3..expression.length-2])
               end
 
-            elsif a_expression.include? '$P{' or a_expression.include? '$F{' or a_expression.include? '$V{'
+            elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'
 
-              a_expression = transform_expression(a_expression)
+              expression = transform_expression(expression)
               rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-              rv.text_field_expression = a_expression.strip
+              rv.text_field_expression = expression.strip
 
             else
 
               rv = StaticText.new
-              rv.text = a_expression
+              rv.text = expression
 
             end
 
@@ -732,10 +786,9 @@ module Sp
                     tag, value =  text.split(':')
                     tag.strip!
                     value.strip!
-                    puts "#{tag} => #{value}"
 
                     if tag == 'PE' or tag == 'printWhenExpression'
-                      a_field.report_element.print_when_expression = value[3..-1].strip
+                      a_field.report_element.print_when_expression = value
                     elsif tag == 'AF' or tag == 'autoFloat'
                       a_field.report_element.position_type = to_b(value) ? 'Float' : 'FixRelativeToTop'
                     elsif tag == 'AS' or tag == 'autoStretch' and a_field.respond_to?(:is_stretch_with_overflow)
