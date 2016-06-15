@@ -51,7 +51,7 @@ module Sp
         end
 
 
-        def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil) #  , a_style_filter = nil, a_keep_formulas = false)
+        def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil)
           ws, tbl, ref = find_table(a_table_name)
 
           header_row = ref.row_range.begin()
@@ -75,8 +75,7 @@ module Sp
             # puts "Line #{index} with template #{line[a_template_column]} will use row #{template_index[line[a_template_column]]}"
             src_row = template_index[line[a_template_column]]
 
-            closed  = line[a_closed_column] == 't'
-            puts "#{dst_row} #{closed}"
+            closed = line[a_closed_column] == 't'
 
             ref.col_range.each do |col|
 
@@ -86,17 +85,12 @@ module Sp
               if ws[dst_row].nil? || ws[dst_row][col].nil?
                 ws.add_cell(dst_row, col, value)
               else
-                #if a_keep_formulas then
-                #ws[dst_row][col].change_contents(value)
-                #else
-                #style_index = ws[dst_row][col].style_index
                 ws.delete_cell(dst_row, col)
                 ws.add_cell(dst_row, col, value)
-                #ws[dst_row][col].style_index = ws[style_row][col].style_index
-                #end
               end
+
+              # Copy formula if the line is open
               if closed == false and ws[src_row][col].formula != nil
-                puts "#{dst_row} #{col} formula #{ws[src_row][col].formula.expression}"
                 ws[dst_row][col].formula = ws[src_row][col].formula
               end
 
