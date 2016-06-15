@@ -50,6 +50,77 @@ module Sp
           end
         end
 
+
+        def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil) #  , a_style_filter = nil, a_keep_formulas = false)
+          ws, tbl, ref = find_table(a_table_name)
+
+          header_row = ref.row_range.begin()
+          style_row  = header_row + a_records.size
+          dst_row    = style_row  + 1
+          type_row   = header_row - 1
+
+          template_index = Hash.new
+
+          a_records.each_with_index do |record, index|
+            template = record.send(a_template_column.to_sym)
+            template_index[template] = header_row + index + 1
+          end
+
+          a_lines.each_with_index do |line, index|
+            if template_index.has_key?(line[a_template_column]) == false
+              puts "Template #{line[a_template_column]} of line #{index+1} does exist in the model"
+              next
+            end
+
+            # puts "Line #{index} with template #{line[a_template_column]} will use row #{template_index[line[a_template_column]]}"
+            src_row = template_index[line[a_template_column]]
+
+            closed  = line[a_closed_column] == 't'
+            puts "#{dst_row} #{closed}"
+
+            ref.col_range.each do |col|
+
+              datatype, value = map_value_and_type(ws[type_row][col].value, line[ws[header_row][col].value])
+
+              # Add or create cell
+              if ws[dst_row].nil? || ws[dst_row][col].nil?
+                ws.add_cell(dst_row, col, value)
+              else
+                #if a_keep_formulas then
+                #ws[dst_row][col].change_contents(value)
+                #else
+                #style_index = ws[dst_row][col].style_index
+                ws.delete_cell(dst_row, col)
+                ws.add_cell(dst_row, col, value)
+                #ws[dst_row][col].style_index = ws[style_row][col].style_index
+                #end
+              end
+              if closed == false and ws[src_row][col].formula != nil
+                puts "#{dst_row} #{col} formula #{ws[src_row][col].formula.expression}"
+                ws[dst_row][col].formula = ws[src_row][col].formula
+              end
+
+              # Only change datatype for number, other values make office bark ...
+              if [RubyXL::DataType::NUMBER].include? datatype
+                ws[dst_row][col].datatype = datatype
+              end
+              ws[dst_row][col].style_index = ws[style_row][col].style_index
+            end
+            ws.change_row_height(dst_row, ws.get_row_height(src_row))
+            dst_row += 1
+          end
+
+          # Adjust the table size
+          previous_last_row = ref.col_range.end()
+          tbl.ref = RubyXL::Reference.ind2ref(ref.row_range.begin(),
+                                              ref.col_range.begin()) + ":" +
+                    RubyXL::Reference.ind2ref(ref.row_range.begin() + a_records.size() + a_lines.ntuples,
+                                              ref.col_range.end())
+          for row in dst_row..previous_last_row
+            ws.delete_row(row)
+          end
+        end
+
         def write_typed_table (a_records, a_table_name, a_style_filter = nil, a_keep_formulas = false)
           ws, tbl, ref = find_table(a_table_name)
 
@@ -61,27 +132,7 @@ module Sp
 
             ref.col_range.each do |col|
 
-              var_name = ws[header_row][col].value
-              value    = record.send(var_name)
-
-              if value.nil?
-                datatype = RubyXL::DataType::RAW_STRING
-              else
-                case ws[type_row][col].value
-                when 'INTEGER'
-                  datatype = RubyXL::DataType::NUMBER
-                when 'MONEY', 'DECIMAL'
-                  datatype = RubyXL::DataType::NUMBER
-                when 'TEXT'
-                  datatype = RubyXL::DataType::RAW_STRING
-                when 'BOOLEAN'
-                  datatype = RubyXL::DataType::BOOLEAN
-                when 'DATETIME', 'DATE'
-                  datatype = RubyXL::DataType::DATE
-                else
-                  datatype = RubyXL::DataType::RAW_STRING
-                end
-              end
+              datatype, value = map_value_and_type(ws[type_row][col].value, record.send(ws[header_row][col].value))
 
               # Add or create cell
               if ws[dst_row].nil? || ws[dst_row][col].nil?
@@ -118,6 +169,40 @@ module Sp
           end
         end
 
+        #
+        # @brief Maps the database type and header to the Excel cell type and value
+        #
+        # @param a_type  The value in the types header row
+        # @param a_value Value from the database
+        #
+        # @return XLS type and value
+        #
+        def map_value_and_type (a_type, a_value)
+
+          if a_value.nil?
+            datatype = RubyXL::DataType::RAW_STRING
+          else
+            case a_type
+            when 'INTEGER', 'INTEGER_NULLABLE'
+              datatype = RubyXL::DataType::NUMBER
+            when 'MONEY', 'MONEY_NULLABLE', 'DECIMAL', 'MONEY_NULLABLE'
+              datatype = RubyXL::DataType::NUMBER
+            when 'TEXT', 'TEXT_NULLABLE'
+              datatype = RubyXL::DataType::RAW_STRING
+            when 'BOOLEAN', 'BOOLEAN_NULLABLE'
+              datatype = RubyXL::DataType::BOOLEAN
+              unless a_value.nil?
+                a_value = a_value == 't' ? 'TRUE' : 'FALSE'
+              end
+            when 'DATETIME', 'DATETIME_NULLABLE', 'DATE', 'DATE_NULLABLE'
+              datatype = RubyXL::DataType::DATE
+            else
+              datatype = RubyXL::DataType::RAW_STRING
+            end
+          end
+          return datatype, a_value
+        end
+
         def read_typed_table (a_worksheet, a_table, a_table_name)
           ref        = RubyXL::Reference.new(a_table.ref)
           header_row = ref.row_range.begin()
@@ -147,7 +232,15 @@ module Sp
                 when 'BOOLEAN', 'BOOLEAN_NULLABLE'
                   value = cell.value.to_i == 0 ? false : true
                 when 'DATE', 'DATE_NULLABLE'
-                  value = DateTime.rfc3339(cell.value.to_s).to_date
+                  begin
+                    value = DateTime.rfc3339(cell.value.to_s).to_date
+                  rescue => e
+                    if type == 'DATE_NULLABLE'
+                      value = nil
+                    else
+                      puts "Error in #{a_worksheet.sheet_name}!#{RubyXL::Reference.ind2ref(header_row,col)} #{e.message}"
+                    end
+                  end
                 when 'DATETIME', 'DATETIME_NULLABLE'
                   value = DateTime.rfc3339(cell.value.to_s)
                 else
@@ -161,7 +254,11 @@ module Sp
                 value.gsub!(/\u00A0+\z/, '')
                 value.strip!
               end
-              record.add_attr(a_worksheet[header_row][col].value, value)
+              begin
+                record.add_attr(a_worksheet[header_row][col].value.strip, value)
+              rescue => e
+                puts "Error in #{a_worksheet.sheet_name}!#{RubyXL::Reference.ind2ref(header_row,col)} #{e.message}"
+              end
             end
             records << record
           end
@@ -227,7 +324,11 @@ module Sp
                 when 'BOOLEAN', 'BOOLEAN_NULLABLE'
                   value = cell.value.to_i == 0 ? 'false' : 'true'
                 when 'DATE', 'DATE_NULLABLE'
-                  value = '\'' + DateTime.rfc3339(cell.value.to_s).to_date + '\''
+                  begin
+                    value = '\'' + DateTime.rfc3339(cell.value.to_s).to_s + '\''
+                  rescue => e
+                    puts "Error in table #{a_xls_table_name} #{RubyXL::Reference.ind2ref(row,col)} #{e.message} value=#{cell.value.to_s}"
+                  end
                 when 'DATETIME', 'DATETIME_NULLABLE'
                   value = DateTime.rfc3339(cell.value.to_s)
                 else
@@ -243,12 +344,16 @@ module Sp
         end
 
         def export_table_to_pg (a_conn, a_schema, a_prefix, a_table_name)
+          export_table_to_pg(a_conn, a_schema, a_prefix, a_table_name, a_table_name)
+        end
+
+        def export_table_to_pg_with_othername (a_conn, a_schema, a_prefix, a_table_name, a_xls_table_name)
           table   = a_schema
           table ||= 'public'
           table  += '.'
           table  += a_prefix unless a_prefix.nil?
           table  += a_table_name
-          export_table_to_pg_other(a_conn, table, a_table_name)
+          export_table_to_pg_other(a_conn, table, a_xls_table_name)
         end
 
         def write (a_filename)
