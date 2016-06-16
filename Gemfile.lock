@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sp-excel-loader (0.3.2)
+    sp-excel-loader (0.3.6)
       json
       rubyXL (~> 3.3.15)
 
@@ -10,9 +10,11 @@ GEM
   specs:
     diff-lcs (1.2.5)
     json (1.8.3)
-    mini_portile2 (2.0.0)
-    nokogiri (1.6.7.2)
-      mini_portile2 (~> 2.0.0.rc2)
+    mini_portile2 (2.1.0)
+    nokogiri (1.6.8)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
+    pkg-config (1.1.7)
     rake (10.4.2)
     rspec (3.2.0)
       rspec-core (~> 3.2.0)
@@ -27,7 +29,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.2.0)
     rspec-support (3.2.1)
-    rubyXL (3.3.16)
+    rubyXL (3.3.20)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.2.0)
