@@ -38,7 +38,8 @@ module Sp
       class WorkbookLoader < TableRow
 
         def initialize (a_file)
-          @workbook = RubyXL::Parser.parse(a_file)
+          @workbook  = RubyXL::Parser.parse(a_file)
+          @cellnames = Hash.new
         end
 
         def read_all_tables ()
@@ -50,6 +51,29 @@ module Sp
           end
         end
 
+        def replace_scalars_in_sheet(a_sheet_name, a_scalars)
+
+          ws = @workbook[a_sheet_name]
+          cellnames = read_named_cells(a_sheet_name)
+
+          a_scalars.each do |name, value|
+
+            cell = cellnames[name]
+            unless cell.nil?
+              col, row = RubyXL::Reference.ref2ind(cell)
+              if ws[col][row].formula.nil?
+                if ws[col][row].datatype.nil? or ws[col][row].datatype == RubyXL::DataType::NUMBER
+                  begin
+                    value = value.to_f
+                  rescue
+                    # let it pass as it is
+                  end
+                end
+                ws[col][row].change_contents(value)
+              end
+            end
+          end
+        end
 
         def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil)
           ws, tbl, ref = find_table(a_table_name)
@@ -94,7 +118,7 @@ module Sp
                 ws[dst_row][col].formula = ws[src_row][col].formula
               end
 
-              # Only change datatype for number, other values make office bark ...
+              # Only change datatype for number, other values make excel bark ...
               if [RubyXL::DataType::NUMBER].include? datatype
                 ws[dst_row][col].datatype = datatype
               end
@@ -141,7 +165,10 @@ module Sp
                   ws[dst_row][col].style_index = style_index
                 end
               end
-              ws[dst_row][col].datatype = datatype
+              # Only change datatype for number, other values make excel bark ...
+              if [RubyXL::DataType::NUMBER].include? datatype
+                ws[dst_row][col].datatype = datatype
+              end
 
               # Call formater hook
               unless a_style_filter.nil?
@@ -269,6 +296,23 @@ module Sp
             end
           end
           raise "Table '#{a_table_name}' not found in the workbook"
+        end
+
+        def read_named_cells (a_sheet_name)
+          cellnames = Hash.new
+          ref_regexp = a_sheet_name + '!\$*([A-Z]+)\$*(\d+)'
+          @workbook.defined_names.each do |dn|
+            next unless dn.local_sheet_id.nil?
+            match = dn.reference.match(ref_regexp)
+            if match and match.size == 3
+              matched_name = match[1].to_s + match[2].to_s
+              if cellnames[matched_name]
+                raise "**** Fatal error:\n     duplicate cellname for #{matched_name}: #{@cellnames[matched_name]} and #{dn.name}"
+              end
+              cellnames[dn.name] = matched_name
+            end
+          end
+          cellnames
         end
 
         def export_table_to_pg_other (a_conn, a_db_table_name, a_xls_table_name)
