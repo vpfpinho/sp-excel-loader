@@ -51,94 +51,6 @@ module Sp
           end
         end
 
-        def replace_scalars_in_sheet(a_sheet_name, a_scalars)
-
-          ws = @workbook[a_sheet_name]
-          cellnames = read_named_cells(a_sheet_name)
-
-          a_scalars.each do |name, value|
-
-            cell = cellnames[name]
-            unless cell.nil?
-              col, row = RubyXL::Reference.ref2ind(cell)
-              if ws[col][row].formula.nil?
-                if ws[col][row].datatype.nil? or ws[col][row].datatype == RubyXL::DataType::NUMBER
-                  begin
-                    value = value.to_f
-                  rescue
-                    # let it pass as it is
-                  end
-                end
-                ws[col][row].change_contents(value)
-              end
-            end
-          end
-        end
-
-        def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil)
-          ws, tbl, ref = find_table(a_table_name)
-
-          header_row = ref.row_range.begin()
-          style_row  = header_row + a_records.size
-          dst_row    = style_row  + 1
-          type_row   = header_row - 1
-
-          template_index = Hash.new
-
-          a_records.each_with_index do |record, index|
-            template = record.send(a_template_column.to_sym)
-            template_index[template] = header_row + index + 1
-          end
-
-          a_lines.each_with_index do |line, index|
-            if template_index.has_key?(line[a_template_column]) == false
-              puts "Template #{line[a_template_column]} of line #{index+1} does exist in the model"
-              next
-            end
-
-            # puts "Line #{index} with template #{line[a_template_column]} will use row #{template_index[line[a_template_column]]}"
-            src_row = template_index[line[a_template_column]]
-
-            closed = line[a_closed_column] == 't'
-
-            ref.col_range.each do |col|
-
-              datatype, value = map_value_and_type(ws[type_row][col].value, line[ws[header_row][col].value])
-
-              # Add or create cell
-              if ws[dst_row].nil? || ws[dst_row][col].nil?
-                ws.add_cell(dst_row, col, value)
-              else
-                ws.delete_cell(dst_row, col)
-                ws.add_cell(dst_row, col, value)
-              end
-
-              # Copy formula if the line is open
-              if closed == false and ws[src_row][col].formula != nil
-                ws[dst_row][col].formula = ws[src_row][col].formula
-              end
-
-              # Only change datatype for number, other values make excel bark ...
-              if [RubyXL::DataType::NUMBER].include? datatype
-                ws[dst_row][col].datatype = datatype
-              end
-              ws[dst_row][col].style_index = ws[style_row][col].style_index
-            end
-            ws.change_row_height(dst_row, ws.get_row_height(src_row))
-            dst_row += 1
-          end
-
-          # Adjust the table size
-          previous_last_row = ref.col_range.end()
-          tbl.ref = RubyXL::Reference.ind2ref(ref.row_range.begin(),
-                                              ref.col_range.begin()) + ":" +
-                    RubyXL::Reference.ind2ref(ref.row_range.begin() + a_records.size() + a_lines.ntuples,
-                                              ref.col_range.end())
-          for row in dst_row..previous_last_row
-            ws.delete_row(row)
-          end
-        end
-
         def write_typed_table (a_records, a_table_name, a_style_filter = nil, a_keep_formulas = false)
           ws, tbl, ref = find_table(a_table_name)
 
@@ -259,7 +171,7 @@ module Sp
                     if type == 'DATE_NULLABLE'
                       value = nil
                     else
-                      puts "Error in #{a_worksheet.sheet_name}!#{RubyXL::Reference.ind2ref(header_row,col)} #{e.message}"
+                      puts "Error in #{a_worksheet.sheet_name}!#{RubyXL::Reference.ind2ref(row,col)} #{e.message}"
                     end
                   end
                 when 'DATETIME', 'DATETIME_NULLABLE'
@@ -400,8 +312,109 @@ module Sp
           @workbook.write(a_filename)
         end
 
-      end
+        ####################################################################################################################
+        #                                                                                                                  #
+        #                       Methods related to cloning of calculation tables that use templates                        #
+        #                                                                                                                  #
+        ####################################################################################################################
 
+
+        #
+        # @brief This method takes a set of parameters read from the database and writes each parameter to excel cell on
+        #        the specified sheet. The target cell must be named the column's name and have *no* formula
+        #
+        # @param a_sheet_name Name of the sheet where the replacements should be made
+        # @param a_scalars    Hash with the values read from the database
+        #
+        def replace_scalars_in_sheet(a_sheet_name, a_scalars)
+
+          ws = @workbook[a_sheet_name]
+          cellnames = read_named_cells(a_sheet_name)
+
+          a_scalars.each do |name, value|
+            cell_id = cellnames[name]
+            unless cell_id.nil?
+              col, row = RubyXL::Reference.ref2ind(cell_id)
+              cell = ws[col][row]
+              if cell.formula.nil?
+                if cell.is_date? == false and (cell.datatype.nil? or cell.datatype == RubyXL::DataType::NUMBER)
+                  begin
+                    value = value.to_f
+                  rescue
+                    # Not a number? let it pass as it is
+                  end
+                end
+                cell.change_contents(value)
+              end
+            end
+          end
+        end
+
+        def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil)
+          ws, tbl, ref = find_table(a_table_name)
+
+          header_row = ref.row_range.begin()
+          style_row  = header_row + a_records.size
+          dst_row    = style_row  + 1
+          type_row   = header_row - 1
+
+          template_index = Hash.new
+
+          a_records.each_with_index do |record, index|
+            template = record.send(a_template_column.to_sym)
+            template_index[template] = header_row + index + 1
+          end
+
+          a_lines.each_with_index do |line, index|
+            if template_index.has_key?(line[a_template_column]) == false
+              puts "Template #{line[a_template_column]} of line #{index+1} does exist in the model"
+              next
+            end
+
+            # puts "Line #{index} with template #{line[a_template_column]} will use row #{template_index[line[a_template_column]]}"
+            src_row = template_index[line[a_template_column]]
+
+            closed = line[a_closed_column] == 't'
+
+            ref.col_range.each do |col|
+
+              datatype, value = map_value_and_type(ws[type_row][col].value, line[ws[header_row][col].value])
+
+              # Add or create cell
+              if ws[dst_row].nil? || ws[dst_row][col].nil?
+                ws.add_cell(dst_row, col, value)
+              else
+                ws.delete_cell(dst_row, col)
+                ws.add_cell(dst_row, col, value)
+              end
+
+              # Copy formula if the line is open
+              if closed == false and ws[src_row][col].formula != nil
+                ws[dst_row][col].formula = ws[src_row][col].formula
+              end
+
+              # Only change datatype for number, other values make excel bark ...
+              if [RubyXL::DataType::NUMBER].include? datatype
+                ws[dst_row][col].datatype = datatype
+              end
+              ws[dst_row][col].style_index = ws[style_row][col].style_index
+            end
+            ws.change_row_height(dst_row, ws.get_row_height(src_row))
+            dst_row += 1
+          end
+
+          # Adjust the table size
+          previous_last_row = ref.col_range.end()
+          tbl.ref = RubyXL::Reference.ind2ref(ref.row_range.begin(),
+                                              ref.col_range.begin()) + ":" +
+                    RubyXL::Reference.ind2ref(ref.row_range.begin() + a_records.size() + a_lines.ntuples,
+                                              ref.col_range.end())
+          for row in dst_row..previous_last_row
+            ws.delete_row(row)
+          end
+        end
+
+      end
     end
   end
 end
