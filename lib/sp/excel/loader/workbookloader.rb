@@ -62,7 +62,7 @@ module Sp
 
             ref.col_range.each do |col|
 
-              datatype, value = map_value_and_type(ws[type_row][col].value, record.send(ws[header_row][col].value))
+              datatype, value = type_n_value_toxls(ws[type_row][col].value, record.send(ws[header_row][col].value))
 
               # Add or create cell
               if ws[dst_row].nil? || ws[dst_row][col].nil?
@@ -103,14 +103,14 @@ module Sp
         end
 
         #
-        # @brief Maps the database type and header to the Excel cell type and value
+        # @brief Convert the database value to the Excel cell type and value
         #
         # @param a_type  The value in the types header row
         # @param a_value Value from the database
         #
         # @return XLS type and value
         #
-        def map_value_and_type (a_type, a_value)
+        def type_n_value_toxls (a_type, a_value)
 
           if a_value.nil?
             datatype = RubyXL::DataType::RAW_STRING
@@ -127,8 +127,12 @@ module Sp
               unless a_value.nil?
                 a_value = a_value == 't' ? 'TRUE' : 'FALSE'
               end
-            when 'DATETIME', 'DATETIME_NULLABLE', 'DATE', 'DATE_NULLABLE'
+            when 'DATE', 'DATE_NULLABLE'
               datatype = RubyXL::DataType::DATE
+              a_value  = @workbook.date_to_num(Date.iso8601(a_value))
+            when 'DATETIME', 'DATETIME_NULLABLE'
+              datatype = RubyXL::DataType::DATE
+              a_value  = @workbook.date_to_num(DateTime.parse(a_value))
             else
               datatype = RubyXL::DataType::RAW_STRING
             end
@@ -227,6 +231,25 @@ module Sp
           cellnames
         end
 
+        ####################################################################################################################
+        #                                                                                                                  #
+        #                                  Methods that write XLS table into to the database                               #
+        #                                                                                                                  #
+        ####################################################################################################################
+
+        def export_table_to_pg (a_conn, a_schema, a_prefix, a_table_name)
+          export_table_to_pg_with_othername(a_conn, a_schema, a_prefix, a_table_name, a_table_name)
+        end
+
+        def export_table_to_pg_with_othername (a_conn, a_schema, a_prefix, a_table_name, a_xls_table_name)
+          table   = a_schema
+          table ||= 'public'
+          table  += '.'
+          table  += a_prefix unless a_prefix.nil?
+          table  += a_table_name
+          export_table_to_pg_other(a_conn, table, a_xls_table_name)
+        end
+
         def export_table_to_pg_other (a_conn, a_db_table_name, a_xls_table_name)
 
           ws, tbl, ref = find_table(a_xls_table_name)
@@ -293,19 +316,6 @@ module Sp
           a_conn.exec("INSERT INTO #{a_db_table_name} (#{column_names.join(',')}) VALUES #{rows.join(",\n")}")
         end
 
-        def export_table_to_pg (a_conn, a_schema, a_prefix, a_table_name)
-          export_table_to_pg(a_conn, a_schema, a_prefix, a_table_name, a_table_name)
-        end
-
-        def export_table_to_pg_with_othername (a_conn, a_schema, a_prefix, a_table_name, a_xls_table_name)
-          table   = a_schema
-          table ||= 'public'
-          table  += '.'
-          table  += a_prefix unless a_prefix.nil?
-          table  += a_table_name
-          export_table_to_pg_other(a_conn, table, a_xls_table_name)
-        end
-
         def write (a_filename)
           @workbook.calculation_chain = nil
           @workbook.calc_pr.full_calc_on_load = true
@@ -337,7 +347,9 @@ module Sp
               col, row = RubyXL::Reference.ref2ind(cell_id)
               cell = ws[col][row]
               if cell.formula.nil?
-                if cell.is_date? == false and (cell.datatype.nil? or cell.datatype == RubyXL::DataType::NUMBER)
+                if cell.is_date?
+                  value = @workbook.date_to_num(DateTime.iso8601(value))
+                elsif (cell.datatype.nil? or cell.datatype == RubyXL::DataType::NUMBER)
                   begin
                     value = value.to_f
                   rescue
@@ -378,7 +390,7 @@ module Sp
 
             ref.col_range.each do |col|
 
-              datatype, value = map_value_and_type(ws[type_row][col].value, line[ws[header_row][col].value])
+              datatype, value = type_n_value_toxls(ws[type_row][col].value, line[ws[header_row][col].value])
 
               # Add or create cell
               if ws[dst_row].nil? || ws[dst_row][col].nil?
