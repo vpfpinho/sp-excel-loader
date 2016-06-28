@@ -34,6 +34,7 @@ module Sp
 
         def read_model (a_sheet_name, a_table_name)
 
+          read_cell_names(a_sheet_name)
           col_names       = Hash.new
           header_columns  = Hash.new
           model           = Hash.new

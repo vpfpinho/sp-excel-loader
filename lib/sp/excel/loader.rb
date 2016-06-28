@@ -23,9 +23,9 @@ require 'json'
 #require 'byebug'
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'rubyxl_table_patch'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'payrollexporter'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'workbookloader'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'model_exporter'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'payrollexporter'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'json_to_xlsx'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'excel_to_jrxml'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'style'))
