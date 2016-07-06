@@ -150,18 +150,26 @@ module Sp
             end
           elsif a_cell.value
             if name
-              begin
-                Float(a_cell.value)
-                expression = "#{name}=#{a_cell.value}"
-              rescue
-                expression = "#{name}=\"#{a_cell.value}\""
+              if a_cell.is_date?
+                expression = "#{name}=excel_date(#{a_cell.value})"
+              else
+                begin
+                  Float(a_cell.value)
+                  expression = "#{name}=#{a_cell.value}"
+                rescue
+                  expression = "#{name}=\"#{a_cell.value}\""
+                end
               end
             else
-              begin
-                Float(a_cell.value)
-                expression = "#{cell_reference}=#{a_cell.value}"
-              rescue
-                expression = "#{cell_reference}=\"#{a_cell.value}\""
+              if a_cell.is_date?
+                expression = "#{cell_reference}=excel_date(#{a_cell_value})"
+              else
+                begin
+                  Float(a_cell.value)
+                  expression = "#{cell_reference}=#{a_cell.value}"
+                rescue
+                  expression = "#{cell_reference}=\"#{a_cell.value}\""
+                end
               end
             end
           end
