@@ -29,7 +29,7 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false)
+          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, write_jrxml = true)
             super(a_excel_filename)
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
@@ -89,8 +89,9 @@ module Sp
             @px_width = @report.page_width - @report.left_margin - @report.right_margin
 
             parse_sheets()
-            File.write(report_name + '.jrxml', @report.to_xml)
-
+            if write_jrxml
+              File.write(report_name + '.jrxml', @report.to_xml)
+            end
           end
 
           def generate_styles

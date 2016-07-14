@@ -32,7 +32,11 @@ module Sp
             @report_element.properties << Property.new('epaper.casper.text.field.load.uri'                                            , a_binding.uri)
             @report_element.properties << Property.new('epaper.casper.text.field.attach'                                              , 'drop-down_list')
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller'                    , 'client')
-            @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.display'            , "[#{a_binding.cc_field_id},#{a_binding.cc_field_name}]")
+            if a_binding.cc_field_name[0] != '['
+              @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.display'          , "[#{a_binding.cc_field_id},#{a_binding.cc_field_name}]")
+            else
+              @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.display'          , a_binding.cc_field_name)
+            end
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.id'                      , a_binding.cc_field_id)
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                    , a_binding.cc_field_name)
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
