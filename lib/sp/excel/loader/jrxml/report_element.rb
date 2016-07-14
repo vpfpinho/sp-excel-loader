@@ -62,16 +62,16 @@ module Sp
           def to_xml (a_node)
             Nokogiri::XML::Builder.with(a_node) do |xml|
               xml.reportElement(attributes)
+              if not @properties.nil?
+                @properties.each do |property|
+                  property.to_xml(a_node.children.last)
+                end
+              end
               unless @print_when_expression.nil?
                 Nokogiri::XML::Builder.with(a_node.children.last) do |xml|
                   xml.printWhenExpression {
                     xml.cdata(@print_when_expression)
                   }
-                end
-              end
-              if not @properties.nil?
-                @properties.each do |property|
-                  property.to_xml(a_node.children.last)
                 end
               end
             end
