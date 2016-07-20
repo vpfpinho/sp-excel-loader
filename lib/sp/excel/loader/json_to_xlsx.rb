@@ -35,6 +35,14 @@ module Sp
         def convert_to_xls ()
           ws, tbl, ref = find_table('lines')
 
+          is_report = false
+          ws[0][0].value.lines.each do |line|
+            directive, value = line.split(':')
+            if directive.strip == 'IsReport' and value.strip == 'true'
+              is_report = true
+            end
+          end
+
           # Replace parameters in header rows
           (0..(ref.row_range.begin()-1)).each do |row|
             ref.col_range.each do |col|
@@ -46,6 +54,7 @@ module Sp
               value = value.to_s
               json_data['data']['attributes'].each do |key, val|
                 value = value.gsub('$P{' + key +'}', val.to_s)
+                value = value.gsub('$V{PAGE_NUMBER}', '1')
               end
               ws[row][col].change_contents(value)
             end
@@ -63,6 +72,27 @@ module Sp
             m = /\A\$F{(.+)}\z/.match cell.value.strip()
             next if m.nil?
             fields[col] = m[1]
+          end
+
+          # Make space for the expanded data table, shift the merged cells down
+          unless @json_data['included'].nil? or @json_data['included'].size == 0
+            row_cnt = @json_data['included'].size
+            if row_cnt != 0
+              (row_cnt - 1).times { ws.insert_row(dst_row + 1) }
+            end
+            ws.merged_cells.each do |cell|
+              next unless cell.ref.row_range.min >= dst_row
+              cell.ref.instance_variable_set(:"@row_range", Range.new(cell.ref.row_range.min + row_cnt - 1, cell.ref.row_range.max + row_cnt - 1))
+            end
+          end
+
+          # If the
+          if is_report
+            ws.change_row_height(0, 6)
+            ws.change_column_width(0, 1)
+            ws.each_with_index do |row, ridx|
+              ws.delete_cell(ridx, 0)
+            end
           end
 
           # Create the table rows
@@ -94,10 +124,19 @@ module Sp
                                                 ref.col_range.begin()) + ":" +
                       RubyXL::Reference.ind2ref(ref.row_range.begin() + (dst_row - header_row - 1),
                                                 ref.col_range.end())
+
           end
+
+          # Delete all worksheets except the one that contains the lines table
+          if is_report
+            @workbook.worksheets.delete_if {|sheet| sheet.sheet_name != ws.sheet_name}
+          end
+
         end
 
-        def workbook ; @workbook ; end
+        def workbook
+          @workbook
+        end
 
       end
 
