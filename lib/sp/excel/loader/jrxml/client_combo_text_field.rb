@@ -40,8 +40,13 @@ module Sp
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.id'                      , a_binding.cc_field_id)
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                    , a_binding.cc_field_name)
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
-            @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                          , a_binding.id[3..-2])
+            if a_binding.cc_field_patch != ''
+              @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                        ,  a_binding.cc_field_patch)
+            else
+              @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                        , a_binding.id[3..-2])
+            end
             @report_element.properties << Property.new('epaper.casper.text.field.patch.type'                                          , a_binding.java_class)
+
             unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
               @report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', a_binding.tooltip)
               a_generator.declare_expression_entities(a_binding.tooltip)

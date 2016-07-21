@@ -358,7 +358,7 @@ module Sp
             for row in @worksheet.dimension.ref.row_range
               next if @worksheet[row].nil?
               next if @worksheet[row][0].nil?
-              row_tag = @worksheet[row][0].value
+              row_tag = @worksheet[row][0].value.to_s
               next if row_tag.nil?
 
               if @band_type != row_tag
@@ -643,6 +643,7 @@ module Sp
 
           def create_field (a_cell)
 
+            fid = nil
             expression = a_cell.value.to_s
             if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
@@ -754,6 +755,11 @@ module Sp
 
             end
 
+            unless f_id.nil?
+              if @widget_factory.java_class(f_id) == 'java.util.Date'
+                rv.text_field_expression = "DateFormat.parse(#{rv.text_field_expression},\"yyyy-MM-dd\")"
+              end
+            end
             return rv
           end
 
