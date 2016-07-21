@@ -134,12 +134,12 @@ module Sp
                                                 ref.col_range.begin()) + ":" +
                       RubyXL::Reference.ind2ref(ref.row_range.begin() + (dst_row - header_row - 1),
                                                 ref.col_range.end())
-
           end
 
-          # In report mode delete all worksheets except the one that contains the lines table
+          # In report mode delete all worksheets except the one that contains the lines table and wipe comments
           if is_report
             @workbook.worksheets.delete_if {|sheet| sheet.sheet_name != ws.sheet_name}
+            ws.comments = Array.new
           end
 
         end

@@ -364,7 +364,6 @@ module Sp
               if @band_type != row_tag
                 adjust_band_height()
                 row_tag.lines.each do |tag|
-                  puts "#{row} => #{tag}"
                   process_row_tag(row, tag)
                 end
                 @first_row_in_band = row
