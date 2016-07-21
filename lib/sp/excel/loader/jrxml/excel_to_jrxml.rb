@@ -122,11 +122,7 @@ module Sp
               end
 
               unless xls_font.color.nil?
-                if xls_font.color.rgb.nil?
-                  style.forecolor = '#FFFFFF'
-                else
-                  style.forecolor = convert_color(xls_font.color)
-                end
+                style.forecolor = convert_color(xls_font.color)
               end
 
               style.font_size = xls_font.sz.val unless xls_font.sz.nil?
@@ -465,8 +461,12 @@ module Sp
             when /Group.isReprintHeaderOnEachPage:.+/i
               @report.group ||= Group.new
               @report.group.is_reprint_header_on_each_page = a_row_tag.split(':')[1].strip == 'true'
-            when /BasicExpressions:.+i/
+            when /BasicExpressions:.+/i
               @widget_factory.basic_expressions = a_row_tag.split(':')[1].strip == 'true'
+            when /Style:.+/i
+              @report.update_extension_style(a_row_tag.split(':')[1].strip, @worksheet[a_row][2])
+              @current_band = nil
+              @band_type    = nil
             else
               @current_band = nil
               @band_type    = nil
@@ -759,6 +759,7 @@ module Sp
               if @widget_factory.java_class(f_id) == 'java.util.Date'
                 rv.text_field_expression = "DateFormat.parse(#{rv.text_field_expression},\"yyyy-MM-dd\")"
                 rv.pattern_expression = "$P{i18n_date_format}"
+                rv.report_element.properties << Property.new('epaper.casper.text.field.patch.pattern', 'yyyy-MM-dd')
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
                 parameter.default_value_expression = '"dd-MM-yyyy"'
                 @report.parameters['i18n_date_format'] = parameter

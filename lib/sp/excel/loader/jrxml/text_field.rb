@@ -30,6 +30,7 @@ module Sp
           attr_accessor :is_blank_when_null
           attr_accessor :pattern
           attr_accessor :pattern_expression
+          attr_reader   :report_element
 
           def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()

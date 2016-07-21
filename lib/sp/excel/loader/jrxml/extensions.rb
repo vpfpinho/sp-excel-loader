@@ -140,16 +140,6 @@ module Sp
               default.mode      ="Opaque"
               default.forecolor ="#000000"
               default.backcolor ="#D2EAF0"
-
-              #if "iva_cover_sheet" == a_report_name or "iva_annex_r" == a_report_name
-              # # cover
-              # default.box       = default_box("#F2F2F2")
-              # default.box.bottom_pen.line_color="#4B95FA"
-              #else
-              # # all others
-              # default.box       = default_box("#000000")
-              #end
-
             @styles << default
 
             invalid = Style.new("EditableTextFieldInvalidContent")
@@ -161,26 +151,13 @@ module Sp
               focused.mode    = "Opaque"
               focused.forecolor = "#808080"
               focused.backcolor = "#F7F2E1"
-
-              #if "iva_cover_sheet" == a_report_name or "iva_annex_r" == a_report_name
-              # # cover
-              # focused.box       = default_box("#CCCCCC")
-              # focused.box.bottom_pen.line_color="#009BB5"
-              #else
-              # # all others
-              # focused.box       = default_box("#000000")
-              # focused.box.bottom_pen.line_color="#009BB5"
-              #end
-
             @styles << focused
 
-            # TODO NOT TESTED
             focused_invalid = Style.new("EditableFocusedInvalidContentTextField")
               focused_invalid.style = "EditableFocusedTextField"
               focused_invalid.box   = bottom_box("#E44A2C")
             @styles << focused_invalid
 
-            # TODO NOT TESTED
             disabled = Style.new("EditableDisabledTextField")
               disabled.mode      = "Opaque"
               disabled.forecolor = "#C7C7C7"

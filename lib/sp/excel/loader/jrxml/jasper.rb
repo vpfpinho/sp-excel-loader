@@ -57,6 +57,7 @@ module Sp
           attr_accessor :orientation
           attr_accessor :paper_size
           attr_accessor :properties
+          attr_reader   :extension
 
           def initialize (a_name)
 
@@ -108,6 +109,14 @@ module Sp
               @page_width  = 595
               @page_height = 842
             end
+          end
+
+          def update_extension_style (a_name, a_cell)
+            @extension.styles.delete_if {|style| style.name == a_name}
+            style           = @styles.delete("style_#{a_cell.style_index+1}")
+            style.name      = a_name
+            @styles[a_name] = style
+            @style_set.add(a_name)
           end
 
           def to_xml
