@@ -38,7 +38,11 @@ module Sp
               @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.display'          , a_binding.cc_field_name)
             end
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.id'                      , a_binding.cc_field_id)
-            @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                    , a_binding.cc_field_name)
+            if a_binding.cc_field_name[0] == '['
+              @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                  , a_binding.cc_field_name[1..-2])
+            else
+              @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                  , a_binding.cc_field_name)
+            end
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
             if a_binding.cc_field_patch != ''
               @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                        ,  a_binding.cc_field_patch)

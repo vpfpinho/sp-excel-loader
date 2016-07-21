@@ -29,6 +29,7 @@ module Sp
           attr_accessor :is_stretch_with_overflow
           attr_accessor :is_blank_when_null
           attr_accessor :pattern
+          attr_accessor :pattern_expression
 
           def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()
