@@ -755,12 +755,12 @@ module Sp
 
             end
 
-            unless f_id.nil? or rv.is_a? TextField
+            if !f_id.nil? && rv.is_a?(TextField)
               if @widget_factory.java_class(f_id) == 'java.util.Date'
                 rv.text_field_expression = "DateFormat.parse(#{rv.text_field_expression},\"yyyy-MM-dd\")"
                 rv.pattern_expression = "$P{i18n_date_format}"
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
-                parameter.default_value_expression = 'dd-MM-yyyy'
+                parameter.default_value_expression = '"dd-MM-yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
               end
             end
