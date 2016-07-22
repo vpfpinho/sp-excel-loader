@@ -486,6 +486,7 @@ module Sp
                     if tag == 'PE' or tag == 'printWhenExpression'
                       if @current_band.print_when_expression.nil?
                         @current_band.print_when_expression = value
+                        transform_expression(value) # to force declaration of paramters/fields/variables
                       end
                     elsif tag == 'lineParentIdField'
                       @current_band.properties ||= Array.new
@@ -803,6 +804,7 @@ module Sp
 
                     if tag == 'PE' or tag == 'printWhenExpression'
                       a_field.report_element.print_when_expression = value
+                      transform_expression(value) # to force declaration of paramters/fields/variables
                     elsif tag == 'AF' or tag == 'autoFloat'
                       a_field.report_element.position_type = to_b(value) ? 'Float' : 'FixRelativeToTop'
                     elsif tag == 'AS' or tag == 'autoStretch' and a_field.respond_to?(:is_stretch_with_overflow)
