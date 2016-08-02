@@ -162,7 +162,7 @@ module Sp
               end
             else
               if a_cell.is_date?
-                expression = "#{cell_reference}=excel_date(#{a_cell_value})"
+                expression = "#{cell_reference}=excel_date(#{a_cell.value})"
               else
                 begin
                   Float(a_cell.value)
