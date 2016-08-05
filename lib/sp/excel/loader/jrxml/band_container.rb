@@ -25,7 +25,6 @@ module Sp
 
         class BandContainer
 
-          attr_reader   :band_type
           attr_accessor :bands
 
           def initialize
@@ -44,19 +43,9 @@ module Sp
             end
           end
 
-          def band
-            return @bands[0]
-          end
-
         end
 
         class Background < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'BG'
-            @bands << Band.new()
-          end
 
           def to_xml (a_node)
             if @bands.size > 0
@@ -71,12 +60,6 @@ module Sp
 
         class PageHeader < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'PH'
-            @bands << Band.new()
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -89,12 +72,6 @@ module Sp
         end
 
         class ColumnHeader < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'CH'
-            @bands << Band.new()
-          end
 
           def to_xml (a_node)
             if @bands.size > 0
@@ -109,11 +86,6 @@ module Sp
 
         class GroupHeader < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'GH'
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -126,11 +98,6 @@ module Sp
         end
 
         class GroupFooter < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'GF'
-          end
 
           def to_xml (a_node)
             if @bands.size > 0
@@ -145,11 +112,6 @@ module Sp
 
         class Detail < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'DT'
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -163,12 +125,6 @@ module Sp
 
         class ColumnFooter < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'CF'
-            @bands << Band.new()
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -181,12 +137,6 @@ module Sp
         end
 
         class PageFooter < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'PF'
-            @bands << Band.new()
-          end
 
           def to_xml (a_node)
             @bands.each do |band|
@@ -223,12 +173,6 @@ module Sp
 
         class LastPageFooter < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'LPF'
-            @bands << Band.new()
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -241,12 +185,6 @@ module Sp
         end
 
         class Summary < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'SU'
-            @bands << Band.new()
-          end
 
           def to_xml (a_node)
             if @bands.size > 0
@@ -261,12 +199,6 @@ module Sp
 
         class Title < BandContainer
 
-          def initialize
-            super()
-            @band_type = 'TL'
-            @bands << Band.new()
-          end
-
           def to_xml (a_node)
             if @bands.size > 0
               Nokogiri::XML::Builder.with(a_node) do |xml|
@@ -279,12 +211,6 @@ module Sp
         end
 
         class NoData < BandContainer
-
-          def initialize
-            super()
-            @band_type = 'ND'
-            @bands << Band.new()
-          end
 
           def to_xml (a_node)
             if @bands.size > 0

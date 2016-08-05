@@ -46,10 +46,8 @@ module Sp
           attr_accessor :style_set
           attr_accessor :fields
           attr_accessor :variables
-          attr_accessor :band_containers
           attr_accessor :builder
           attr_accessor :group
-          attr_accessor :detail
           attr_accessor :query_string
           attr_accessor :page_width
           attr_accessor :page_height
@@ -59,18 +57,39 @@ module Sp
           attr_accessor :properties
           attr_reader   :extension
 
+          # band containers
+          attr_accessor :detail
+          attr_accessor :title
+          attr_accessor :background
+          attr_accessor :page_header
+          attr_accessor :column_header
+          attr_accessor :column_footer
+          attr_accessor :page_footer
+          attr_accessor :last_page_footer
+          attr_accessor :summary
+          attr_accessor :no_data
+
           def initialize (a_name)
 
             # init data set
-            @group           = nil
-            @detail          = nil
+            @group            = nil
+            @detail           = nil
+            @title            = nil
+            @background       = nil
+            @page_header      = nil
+            @column_header    = nil
+            @column_footer    = nil
+            @page_footer      = nil
+            @last_page_footer = nil
+            @summary          = nil
+            @no_data          = nil
+
             @query_string    = 'lines'
             @parameters      = Hash.new
             @fields          = Hash.new
             @variables       = Hash.new
             @styles          = Hash.new
             @style_set       = Set.new
-            @band_containers = Array.new
 
             # defaults for jasper report attributes
             @orientation       = 'Portrait'
@@ -183,13 +202,16 @@ module Sp
 
             @group.to_xml(@builder.doc.children[0]) unless @group.nil?
 
-            summary_bands    = @band_containers.reject { |e| "SU" != e.band_type }
-            all_other_bands  = @band_containers.reject { |e| "SU" == e.band_type }
-            @band_containers = all_other_bands + summary_bands
-
-            @band_containers.each do |band_container|
-              band_container.to_xml(@builder.doc.children[0])
-            end
+            @background.to_xml(@builder.doc.children[0])       unless @background.nil?
+            @title.to_xml(@builder.doc.children[0])            unless @title.nil?
+            @page_header.to_xml(@builder.doc.children[0])      unless @page_header.nil?
+            @column_header.to_xml(@builder.doc.children[0])    unless @column_header.nil?
+            @detail.to_xml(@builder.doc.children[0])           unless @detail.nil?
+            @column_footer.to_xml(@builder.doc.children[0])    unless @column_footer.nil?
+            @page_footer.to_xml(@builder.doc.children[0])      unless @page_footer.nil?
+            @last_page_footer.to_xml(@builder.doc.children[0]) unless @last_page_footer.nil?
+            @summary.to_xml(@builder.doc.children[0])          unless @summary.nil?
+            @no_data.to_xml(@builder.doc.children[0])          unless @no_data.nil?
 
             @builder.to_xml(indent:2)
           end

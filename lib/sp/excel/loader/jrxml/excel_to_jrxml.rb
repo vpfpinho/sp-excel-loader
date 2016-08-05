@@ -29,7 +29,7 @@ module Sp
 
           attr_reader   :report
 
-          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, write_jrxml = true)
+          def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, write_jrxml = true, a_allow_sub_bands = true)
             super(a_excel_filename)
             read_all_tables()
             report_name = File.basename(a_excel_filename, '.xlsx')
@@ -43,6 +43,7 @@ module Sp
             @auto_stretch                = false
             @band_split_type             = nil
             @basic_expressions           = false
+            @allow_sub_bands             = a_allow_sub_bands
 
             # If the field map is not supplied load aux tables from the same excel
             if a_fields_map.nil?
@@ -354,7 +355,7 @@ module Sp
             for row in @worksheet.dimension.ref.row_range
               next if @worksheet[row].nil?
               next if @worksheet[row][0].nil?
-              row_tag = @worksheet[row][0].value.to_s
+              row_tag = map_row_tag(@worksheet[row][0].value.to_s)
               next if row_tag.nil?
 
               if @band_type != row_tag
@@ -375,58 +376,64 @@ module Sp
           def process_row_tag (a_row, a_row_tag)
 
             case a_row_tag
-            when 'BG:'
-              @report.band_containers << Background.new
-              @current_band = @report.band_containers.last.band
+            when /BG\d*:/
+              @report.background ||= Background.new
+              @current_band = Band.new
+              @report.background.bands << @current_band
               @band_type = a_row_tag
-            when 'TL:'
-              @report.band_containers << Title.new
-              @current_band = @report.band_containers.last.band
+            when /TL\d*:/
+              @report.title ||= Title.new
+              @current_band = Band.new
+              @report.title.bands << @current_band
               @band_type = a_row_tag
-            when 'PH:'
-              @report.band_containers << PageHeader.new
-              @current_band = @report.band_containers.last.band
+            when /PH\d*:/
+              @report.page_header ||= PageHeader.new
+              @current_band = Band.new
+              @report.page_header.bands << @current_band
               @band_type = a_row_tag
-            when 'CH:'
-              @report.band_containers << ColumnHeader.new
-              @current_band = @report.band_containers.last.band
+            when /CH\d*:/
+              @report.column_header ||= ColumnHeader.new
+              @current_band = Band.new
+              @report.column_header.bands << @current_band
               @band_type = a_row_tag
             when /DT\d*/
+              @report.detail ||= Detail.new
               @current_band = Band.new
-              if @report.detail.nil?
-                @report.detail = Detail.new
-                @report.band_containers << @report.detail
-              end
               @report.detail.bands << @current_band
               @band_type = a_row_tag
-            when 'CF:'
-              @report.band_containers << ColumnFooter.new
-              @current_band = @report.band_containers.last.band
+            when /CF\d*:/
+              @report.column_footer ||= ColumnFooter.new
+              @current_band = Band.new
+              @report.column_footer.bands << @current_band
               @band_type = a_row_tag
-            when 'PF:'
-              @report.band_containers << PageFooter.new
-              @current_band = @report.band_containers.last.band
+            when /PF\d*:/
+              @report.page_footer ||= PageFooter.new
+              @current_band = Band.new
+              @report.page_footer.bands << @current_band
               @band_type = a_row_tag
-            when 'LPF:'
-              @report.band_containers << LastPageFooter.new
-              @current_band = @report.band_containers.last.band
+            when /LPF\d*:/
+              @report.last_page_footer ||= LastPageFooter.new
+              @current_band = Band.new
+              @report.last_page_footer.bands << @current_band
               @band_type = a_row_tag
-            when 'SU:'
-              @report.band_containers << Summary.new
-              @current_band = @report.band_containers.last.band
+            when /SU\d*:/
+              @report.summary ||= Summary.new
+              @current_band = Band.new
+              @report.summary.bands << @current_band
               @band_type = a_row_tag
-            when 'ND:'
-              @report.band_containers << NoData.new
-              @current_band = @report.band_containers.last.band
+            when /ND\d*:/
+              @report.no_data ||= NoData.new
+              @current_band = Band.new
+              @report.no_data.bands << @current_band
               @band_type = a_row_tag
             when /GH\d*:/
-              @current_band = Band.new
               @report.group ||= Group.new
+              @current_band = Band.new
               @report.group.group_header.bands << @current_band
               @band_type = a_row_tag
             when /GF\d*:/
-              @current_band = Band.new
               @report.group ||= Group.new
+              @current_band = Band.new
               @report.group.group_footer.bands << @current_band
               @band_type = a_row_tag
             when /Orientation:.+/i
@@ -505,6 +512,16 @@ module Sp
               end
             end
 
+          end
+
+          def map_row_tag (a_row_tag)
+            unless @allow_sub_bands
+              match = a_row_tag.match(/\A(TL|SU|BG|PH|CH|DT|CF|PF|LPF|ND)\d*:\z/)
+              if match != nil and match.size == 2
+                return match[1] + ':'
+              end
+            end
+            a_row_tag
           end
 
           def to_b (a_value)
@@ -834,13 +851,13 @@ module Sp
                 next
               elsif match.start_with?('$P{')
                 terms << match
-                add_parameter(match[0], match[3..-2])
+                add_parameter(match, match[3..-2])
               elsif match.start_with?('$F{')
                 terms << match
-                add_field(match[0], match[3..-2])
+                add_field(match, match[3..-2])
               elsif match.start_with?('$V{')
                 terms << match
-                add_variable(match[0], match[3..-2])
+                add_variable(match, match[3..-2])
               else
                 terms << '"' + match + '"'
               end
@@ -902,7 +919,7 @@ module Sp
 
             height = 0
             for row in @worksheet.dimension.ref.row_range
-              unless @worksheet[row].nil? or @worksheet[row][0].nil? or @worksheet[row][0].value.nil? or @worksheet[row][0].value != @band_type
+              unless @worksheet[row].nil? or @worksheet[row][0].nil? or @worksheet[row][0].value.nil? or map_row_tag(@worksheet[row][0].value) != @band_type
                 height += @worksheet.get_row_height(row)
               end
             end

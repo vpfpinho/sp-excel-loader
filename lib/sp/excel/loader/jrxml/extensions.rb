@@ -303,8 +303,10 @@ module Sp
               @fields_map[a_id].java_class
             elsif '$V{PAGE_NUMBER}' == a_id || '$V{CONTINUOUS_PAGE_NUMBER}' == a_id
               return 'java.lang.Integer'
+            elsif '$V{RENDERER_ID}' == a_id
+              return 'java.lang.String'
             else
-              if @basic_expressions
+              if @basic_expression
                 raise ArgumentError, "Don't know how to set '#{a_id}' java class!"
               else
                 return 'java.lang.String'
