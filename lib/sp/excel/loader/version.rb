@@ -20,7 +20,7 @@
 module Sp
   module Excel
     module Loader
-      VERSION = '0.3.10'
+      VERSION = '0.3.11'
     end
   end
 end

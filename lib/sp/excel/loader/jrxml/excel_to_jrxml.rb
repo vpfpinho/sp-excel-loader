@@ -360,9 +360,7 @@ module Sp
 
               if @band_type != row_tag
                 adjust_band_height()
-                row_tag.lines.each do |tag|
-                  process_row_tag(row, tag)
-                end
+                process_row_mtag(row, row_tag)
                 @first_row_in_band = row
               end
               unless @current_band.nil?
@@ -371,6 +369,16 @@ module Sp
             end
 
             adjust_band_height()
+          end
+
+          def process_row_mtag (a_row, a_row_tag)
+            if a_row_tag.nil? or a_row_tag.lines.size == 0
+              process_row_tag(a_row, a_row_tag)
+            else
+              a_row_tag.lines.each do |tag|
+                process_row_tag(a_row, tag)
+              end
+            end
           end
 
           def process_row_tag (a_row, a_row_tag)

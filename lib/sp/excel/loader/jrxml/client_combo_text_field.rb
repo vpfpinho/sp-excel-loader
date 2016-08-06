@@ -44,7 +44,7 @@ module Sp
               @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.field.name'                  , a_binding.cc_field_name)
             end
             @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
-            if a_binding.cc_field_patch != ''
+            if a_binding.respond_to?(:cc_field_patch) and a_binding.cc_field_patch != ''
               @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                        ,  a_binding.cc_field_patch)
             else
               @report_element.properties << Property.new('epaper.casper.text.field.patch.name'                                        , a_binding.id[3..-2])
