@@ -37,7 +37,7 @@ module Sp
 
           # Detect optional report mode
           is_report = false
-          if !ws[0].nil?
+          if !ws[0].nil? && !ws[0][0].nil?
             ws[0][0].value.lines.each do |line|
               directive, value = line.split(':')
               if directive.strip == 'IsReport' and value.strip == 'true'
