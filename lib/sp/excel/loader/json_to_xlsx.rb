@@ -87,7 +87,7 @@ module Sp
           end
 
           # Make space for the expanded data table, shift the merged cells down
-          unless @json_data['included'].nil? or @json_data['included'].size == 0
+          if is_report && !@json_data['included'].nil? && @json_data['included'].size != 0
             row_cnt = @json_data['included'].size
             if row_cnt != 0
               (row_cnt - 1).times { ws.insert_row(dst_row + 1) }
