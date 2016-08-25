@@ -785,7 +785,7 @@ module Sp
               if @widget_factory.java_class(f_id) == 'java.util.Date'
                 rv.text_field_expression = "DateFormat.parse(#{rv.text_field_expression},\"yyyy-MM-dd\")"
                 rv.pattern_expression = "$P{i18n_date_format}"
-                rv.report_element.properties << Property.new('epaper.casper.text.field.patch.pattern', 'yyyy-MM-dd')
+                rv.report_element.properties << Property.new('epaper.casper.text.field.patch.pattern', 'yyyy-MM-dd') unless rv.report_element.properties.nil?
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
                 parameter.default_value_expression = '"dd-MM-yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
