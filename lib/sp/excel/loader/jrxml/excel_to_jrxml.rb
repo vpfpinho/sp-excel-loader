@@ -822,8 +822,12 @@ module Sp
                 if comment.ref.col_range.begin == a_col && comment.ref.row_range.begin == a_row
                   comment.text.to_s.lines.each do |text|
                     text.strip!
-                    next if text == ''
-                    tag, value =  text.split(':')
+                    next if text == '' or text.nil?
+                    idx = text.index(':')
+                    next if idx.nil?
+                    tag   = text[0..(idx-1)]
+                    value = text[(idx+1)..-1]
+                    next if tag.nil? or value.nil?
                     tag.strip!
                     value.strip!
 
