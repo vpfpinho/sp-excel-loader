@@ -840,6 +840,18 @@ module Sp
                       a_field.is_blank_when_null = to_b(value)
                     elsif tag == 'PT' or tag == 'pattern' and a_field.respond_to?(:pattern)
                       a_field.pattern = value
+                    elsif tag == 'DE' or tag == 'disabledExpression'
+                      a_field.report_element.properties ||= Array.new
+                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
+                    elsif tag == 'SE' or tag == 'styleExpression'
+                      a_field.report_element.properties ||= Array.new
+                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
+                    elsif tag == 'RIC' or tag == 'reloadIfChanged'
+                      a_field.report_element.properties ||= Array.new
+                      a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
+                    elsif tag == 'EE' or tag == 'editableExpression'
+                      a_field.report_element.properties ||= Array.new
+                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.editable.if', value)
                     end
                   end
 
