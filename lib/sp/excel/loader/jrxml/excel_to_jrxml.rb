@@ -843,15 +843,18 @@ module Sp
                     elsif tag == 'DE' or tag == 'disabledExpression'
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
+                      transform_expression(value) # to force declaration of paramters/fields/variables
                     elsif tag == 'SE' or tag == 'styleExpression'
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
-                    elsif tag == 'RIC' or tag == 'reloadIfChanged'
+                      transform_expression(value) # to force declaration of paramters/fields/variables
+                    elsif tag == 'RIC' or tag == '  '
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
                     elsif tag == 'EE' or tag == 'editableExpression'
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.editable.if', value)
+                      transform_expression(value) # to force declaration of paramters/fields/variables
                     end
                   end
 
