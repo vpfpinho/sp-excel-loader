@@ -848,7 +848,7 @@ module Sp
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
                       transform_expression(value) # to force declaration of paramters/fields/variables
-                    elsif tag == 'RIC' or tag == '  '
+                    elsif tag == 'RIC' or tag == 'reloadIfChanged'
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
                     elsif tag == 'EE' or tag == 'editableExpression'
