@@ -245,7 +245,7 @@ module Sp
             config[1].strip!
             editable = ClientCombo.new(a_field_id=config[1], a_id=config[0], a_uri="model://#{config[0]}")
             widget = TextField.new(a_properties = editable.properties, a_pattern = nil, a_pattern_expression = nil)
-            { id: editable.id, widget: widget, field:config[1] }
+            { id: editable.id, widget: widget, field:config[1], display_field: config.size > 2 ? config[2] : nil }
           end
 
           def new_checkbox(a_config)

@@ -705,6 +705,7 @@ module Sp
               rv    = combo[:widget]
               f_id  = combo[:field]
               f_nm  = f_id[3..f_id.length-2]
+              d_fld = nil != combo[:display_field] ? combo[:display_field] : "name"
 
               if f_id.match(/^\$P{/)
                 add_parameter(f_id, f_nm)
@@ -716,7 +717,7 @@ module Sp
                 raise ArgumentError, "Don't know how to add '#{f_id}'!"
               end
 
-              rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"name\")"
+              rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"#{d_fld}\")"
 
             elsif expression.match(/^\$CB{/)
 
