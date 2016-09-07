@@ -20,6 +20,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
 
-  spec.add_dependency 'rubyXL', '~> 3.3.15'
+  spec.add_dependency 'rubyXL'
   spec.add_dependency 'json'
 end
