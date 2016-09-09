@@ -348,7 +348,11 @@ module Sp
               cell = ws[col][row]
               if cell.formula.nil?
                 if cell.is_date?
-                  value = @workbook.date_to_num(DateTime.iso8601(value))
+                  if value.nil? or value.length == 0
+                    value = nil
+                  else
+                    value = @workbook.date_to_num(DateTime.iso8601(value))
+                  end
                 elsif (cell.datatype.nil? or cell.datatype == RubyXL::DataType::NUMBER)
                   begin
                     value = value.to_f
