@@ -132,8 +132,10 @@ module Sp
 
           def update_extension_style (a_name, a_cell)
             @extension.styles.delete_if {|style| style.name == a_name}
-            style           = @styles.delete("style_#{a_cell.style_index+1}")
-            style.name      = a_name
+            style              = @styles.delete("style_#{a_cell.style_index+1}")
+            style.name         = a_name
+            style.v_text_align = nil
+            style.h_text_align = nil
             @styles[a_name] = style
             @style_set.add(a_name)
           end
