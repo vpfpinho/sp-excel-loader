@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sp-excel-loader (0.3.15)
+    sp-excel-loader (0.3.17)
       json
       rubyXL
 

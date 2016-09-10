@@ -37,6 +37,8 @@ module Sp
 
       class WorkbookLoader < TableRow
 
+        attr_accessor :workbook
+
         def initialize (a_file)
           @workbook  = RubyXL::Parser.parse(a_file)
           @cellnames = Hash.new
@@ -366,6 +368,30 @@ module Sp
           end
         end
 
+        def parse_shared_formulas (a_worksheet)
+          @shared_formulas = Hash.new
+          ref = a_worksheet.dimension.ref
+          ref.row_range.each do |row|
+            ref.col_range.each do |col|
+              next if a_worksheet[row].nil?
+              cell = a_worksheet[row][col]
+              next if cell.nil?
+              formula = cell.formula
+              next if formula.nil?
+
+              if formula.t == 'shared' and not formula.expression.nil? and formula.expression.length != 0
+                @shared_formulas[formula.si] = formula.expression
+              end
+            end
+          end
+        end
+
+        def read_formula_expression (a_cell)
+          return nil if (a_cell.formula.nil?)
+          return @shared_formulas[a_cell.formula.si] if a_cell.formula.t == 'shared'
+          return a_cell.formula.expression
+        end
+
         def clone_lines_table (a_records, a_table_name, a_lines, a_template_column, a_closed_column = nil)
           ws, tbl, ref = find_table(a_table_name)
 
@@ -375,11 +401,15 @@ module Sp
           type_row   = header_row - 1
 
           template_index = Hash.new
-
           a_records.each_with_index do |record, index|
             template = record.send(a_template_column.to_sym)
             template_index[template] = header_row + index + 1
           end
+
+          #for row in dst_row..1000
+          #  ws.delete_row(row)
+          #end
+          parse_shared_formulas(ws)
 
           a_lines.each_with_index do |line, index|
             if template_index.has_key?(line[a_template_column]) == false
@@ -396,17 +426,12 @@ module Sp
 
               datatype, value = type_n_value_toxls(ws[type_row][col].value, line[ws[header_row][col].value])
 
-              # Add or create cell
-              if ws[dst_row].nil? || ws[dst_row][col].nil?
-                ws.add_cell(dst_row, col, value)
-              else
-                ws.delete_cell(dst_row, col)
-                ws.add_cell(dst_row, col, value)
-              end
-
               # Copy formula if the line is open
-              if closed == false and ws[src_row][col].formula != nil
-                ws[dst_row][col].formula = ws[src_row][col].formula
+              expression = read_formula_expression(ws[src_row][col])
+              if false && closed == false and not expression.nil? and expression.length != 0
+                ws.add_cell(dst_row, col, '', expression)
+              else
+                ws.add_cell(dst_row, col, value)
               end
 
               # Only change datatype for number, other values make excel bark ...
@@ -425,9 +450,6 @@ module Sp
                                               ref.col_range.begin()) + ":" +
                     RubyXL::Reference.ind2ref(ref.row_range.begin() + a_records.size() + a_lines.ntuples,
                                               ref.col_range.end())
-          for row in dst_row..previous_last_row
-            ws.delete_row(row)
-          end
         end
 
       end
