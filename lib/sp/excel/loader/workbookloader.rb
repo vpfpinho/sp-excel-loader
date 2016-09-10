@@ -120,8 +120,10 @@ module Sp
             case a_type
             when 'INTEGER', 'INTEGER_NULLABLE'
               datatype = RubyXL::DataType::NUMBER
+              a_value  = a_value.to_i
             when 'MONEY', 'MONEY_NULLABLE', 'DECIMAL', 'MONEY_NULLABLE'
               datatype = RubyXL::DataType::NUMBER
+              a_value  = a_value.to_f
             when 'TEXT', 'TEXT_NULLABLE'
               datatype = RubyXL::DataType::RAW_STRING
             when 'BOOLEAN', 'BOOLEAN_NULLABLE'
@@ -406,9 +408,6 @@ module Sp
             template_index[template] = header_row + index + 1
           end
 
-          #for row in dst_row..1000
-          #  ws.delete_row(row)
-          #end
           parse_shared_formulas(ws)
 
           a_lines.each_with_index do |line, index|
@@ -417,9 +416,7 @@ module Sp
               next
             end
 
-            # puts "Line #{index} with template #{line[a_template_column]} will use row #{template_index[line[a_template_column]]}"
             src_row = template_index[line[a_template_column]]
-
             closed = line[a_closed_column] == 't'
 
             ref.col_range.each do |col|
@@ -432,11 +429,6 @@ module Sp
                 ws.add_cell(dst_row, col, '', expression)
               else
                 ws.add_cell(dst_row, col, value)
-              end
-
-              # Only change datatype for number, other values make excel bark ...
-              if [RubyXL::DataType::NUMBER].include? datatype
-                ws[dst_row][col].datatype = datatype
               end
               ws[dst_row][col].style_index = ws[style_row][col].style_index
             end
