@@ -428,7 +428,7 @@ module Sp
 
               # Copy formula if the line is open
               expression = read_formula_expression(ws[src_row][col])
-              if false && closed == false and not expression.nil? and expression.length != 0
+              if closed == false and not expression.nil? and expression.length != 0
                 ws.add_cell(dst_row, col, '', expression)
               else
                 ws.add_cell(dst_row, col, value)
