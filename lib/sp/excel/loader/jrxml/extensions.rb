@@ -212,20 +212,22 @@ module Sp
 
           def new_for_field (a_id, a_generator)
 
+            binding = @fields_map[a_id]
+
             if a_id.match(/^\$P{/) || a_id.match(/^\$F{/)
-              editable = @fields_map.has_key?(a_id) && @fields_map[a_id].editable ? Editable.new(a_id) : nil
+              editable = @fields_map.has_key?(a_id) && binding.editable ? Editable.new(a_id) : nil
             else
               editable = nil
             end
 
-            if @fields_map.has_key?(a_id) and @fields_map[a_id].respond_to?(:widget) and @fields_map[a_id].widget == 'Client Combo'
+            if binding != nil and binding.respond_to?(:widget) and binding.widget == 'Client Combo'
 
-              widget = ClientComboTextField.new(@fields_map[a_id], a_generator)
+              widget = ClientComboTextField.new(binding, a_generator)
 
             else
 
-              if @fields_map.has_key?(a_id) and not @fields_map[a_id].presentation.nil? and @fields_map[a_id].presentation.format != ''
-                pattern = @fields_map[a_id].presentation.format
+              if binding != nil and not binding.presentation.nil? and binding.presentation.format != ''
+                pattern = binding.presentation.format
               else
                 pattern = nil
               end
@@ -235,6 +237,11 @@ module Sp
               else
                 widget = TextField.new(a_properties = editable.properties, a_pattern = pattern, a_pattern_expression = nil)
               end
+            end
+
+            if binding != nil and binding.tooltip != nil and not binding.tooltip.strip.empty?
+              widget.report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', binding.tooltip)
+              a_generator.declare_expression_entities(@fields_map[a_id].tooltip)
             end
             widget
           end

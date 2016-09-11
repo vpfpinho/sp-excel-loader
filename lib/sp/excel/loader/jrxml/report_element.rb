@@ -64,7 +64,14 @@ module Sp
               xml.reportElement(attributes)
               if not @properties.nil?
                 @properties.each do |property|
-                  property.to_xml(a_node.children.last)
+                  if property.instance_of? Property
+                    property.to_xml(a_node.children.last)
+                  end
+                end
+                @properties.each do |property|
+                  if property.instance_of? PropertyExpression
+                    property.to_xml(a_node.children.last)
+                  end
                 end
               end
               unless @print_when_expression.nil?
