@@ -48,6 +48,7 @@ module Sp
 
           # Go hunting for shared formulas
           worksheet.each do |row|
+            next if row.nil?
             for col in (0..row.size())
               cell = row[col]
               if cell and cell.formula and cell.formula.ref and cell.formula.t = 'shared'
@@ -103,6 +104,8 @@ module Sp
           renum =  (0..ref.row_range.begin()).to_a
           renum += (ref.row_range.end()+1..worksheet.dimension.ref.row_range.end()).to_a
           for idx in renum
+            next if worksheet[idx].nil?
+            next if worksheet[idx].cells.nil?
             worksheet[idx].cells.each do |cell|
               if cell
                 key, expression = cell_expression(cell)
