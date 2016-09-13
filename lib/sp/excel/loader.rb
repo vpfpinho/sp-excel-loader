@@ -58,7 +58,7 @@ module Sp
       end
 
       def self.read_excel_n_save (a_path_name, a_json_save_folder)
-        we = PayrollExporter.parse(a_path_name)
+        we = PayrollExporter.parse(a_path_name, false)
         we.write_json_tables(a_json_save_folder)
         we.write_json_files(a_json_save_folder)
         we
