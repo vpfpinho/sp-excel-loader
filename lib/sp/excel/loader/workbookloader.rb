@@ -40,8 +40,9 @@ module Sp
         attr_accessor :workbook
 
         def initialize (a_file)
-          @workbook  = RubyXL::Parser.parse(a_file)
-          @cellnames = Hash.new
+          @workbook        = RubyXL::Parser.parse(a_file)
+          @cellnames       = Hash.new
+          @shared_formulas = Hash.new
         end
 
         def read_all_tables ()

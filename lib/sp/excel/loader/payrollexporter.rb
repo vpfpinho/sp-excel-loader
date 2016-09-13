@@ -24,23 +24,17 @@ module Sp
 
       class PayrollExporter < ModelExporter
 
-        @workbook
-        @tables
-        @pretty
-        @cellnames
-        @model
-        @shared_formulas
-
         attr_accessor  :tables
         attr_accessor  :model
 
-        def initialize (a_file)
-          @workbook        = RubyXL::Parser.parse(a_file)
+        def initialize (a_file, a_typed_export)
+          super(a_file, a_typed_export)
+          #@workbook        = RubyXL::Parser.parse(a_file)
           @tables          = Hash.new
           @pretty          = true
-          @cellnames       = Hash.new
-          @model           = Hash.new
-          @shared_formulas = Hash.new
+          #@cellnames       = Hash.new
+          #@model           = Hash.new
+          #@shared_formulas = Hash.new
         end
 
         def read_untyped_table (a_worksheet, a_table, a_table_name)
@@ -125,9 +119,9 @@ module Sp
           end
         end
 
-        def self.parse (a_path_name)
+        def self.parse (a_path_name, a_typed_export)
           sheet_name = 'PROCESSAMENTO'
-          we = PayrollExporter.new(a_path_name)
+          we = PayrollExporter.new(a_path_name, a_typed_export)
           we.read_all_untyped_tables
           we.read_model(sheet_name, 'LINES')
           we

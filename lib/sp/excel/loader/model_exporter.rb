@@ -26,10 +26,10 @@ module Sp
 
         attr_accessor  :model
 
-        def initialize (a_file)
+        def initialize (a_file, a_typed_export)
           super(a_file)
-          @shared_formulas = Hash.new
-          @model           = Hash.new
+          @model        = Hash.new
+          @typed_export = a_typed_export
         end
 
         def read_model (a_sheet_name, a_table_name)
@@ -37,7 +37,6 @@ module Sp
           read_cell_names(a_sheet_name)
           col_names       = Hash.new
           header_columns  = Hash.new
-          model           = Hash.new
           scalar_formulas = Hash.new
           formula_lines   = Array.new
           scalar_values   = Hash.new
@@ -46,29 +45,25 @@ module Sp
           worksheet  = @workbook[a_sheet_name]
           ref        = nil
 
-          # Go hunting for shared formulas
-          worksheet.each do |row|
-            next if row.nil?
-            for col in (0..row.size())
-              cell = row[col]
-              if cell and cell.formula and cell.formula.ref and cell.formula.t = 'shared'
-                @shared_formulas[cell.formula.ref] = cell.formula.expression
-              end
-            end
-          end
+          parse_shared_formulas(worksheet)
 
           # Capture the columns names
           worksheet.generic_storage.each do |tbl|
             next unless tbl.is_a? RubyXL::Table and tbl.name == a_table_name
 
-            ref = RubyXL::Reference.new(tbl.ref)
-            i   = ref.col_range.first()
+            ref      = RubyXL::Reference.new(tbl.ref)
+            type_row = ref.row_range.first() - 1
+            i        = ref.col_range.first()
             tbl.table_columns.each do |table_col|
-              col_names[i] = table_col.name
+              if @typed_export
+                col_names[i] = { 'name' => table_col.name, 'type' => get_column_type(worksheet, type_row, i) }
+              else
+                col_names[i] = table_col.name
+              end
               i += 1
             end
 
-            col_names.sort.map do |key,value|
+            col_names.sort.map do |key, value|
               header_columns[RubyXL::Reference.new(ref.row_range.first(),ref.col_range.first() + key - 1)] = value
             end
           end
@@ -77,14 +72,16 @@ module Sp
           for row in ref.row_range.begin()+1..ref.row_range.end()
             formula   = Hash.new
             value     = Hash.new
-            cell_ref  = RubyXL::Reference.new(row, row, ref.col_range.begin(), ref.col_range.end())
             col_index = 1
 
             ref.col_range.each do |col|
 
-              cell           = worksheet[row][col]
-              column         = col_names[col_index]
-
+              cell = worksheet[row][col]
+              if @typed_export
+                column = col_names[col_index]['name']
+              else
+                column = col_names[col_index]
+              end
               if cell
                 key, expression = cell_expression(cell)
                 if cell.formula
@@ -109,10 +106,13 @@ module Sp
             worksheet[idx].cells.each do |cell|
               if cell
                 key, expression = cell_expression(cell)
+
                 if cell.formula
-                  scalar_formulas[key] = expression
+                  scalar_formulas[key] = @typed_export ? get_typed_scalar(cell, expression) : expression
                 else
-                  scalar_values[key] = expression unless expression.nil?
+                  unless expression.nil?
+                    scalar_values[key] = @typed_export ? get_typed_scalar(cell, expression) : expression
+                  end
                 end
               end
             end
@@ -133,23 +133,13 @@ module Sp
 
           cell_reference = RubyXL::Reference.ind2ref(a_cell.row, a_cell.column)
           name           = @cellnames[cell_reference]
+          formula        = read_formula_expression(a_cell)
 
-          if a_cell.formula
-
-            # Patch for shared formulas
-            if a_cell.formula.t == 'shared' and a_cell.formula.expression = ""
-              cr = RubyXL::Reference.new(a_cell.row, a_cell.row, a_cell.column, a_cell.column)
-              for range in @shared_formulas.keys
-                if range.cover?(cr)
-                  a_cell.formula.expression = @shared_formulas[range]
-                end
-              end
-            end
-
+          if formula != nil
             if name
-              expression = "#{name}=#{a_cell.formula.expression}"
+              expression = "#{name}=#{formula}"
             else
-              expression = "#{cell_reference}=#{a_cell.formula.expression}"
+              expression = "#{cell_reference}=#{formula}"
             end
           elsif a_cell.value
             if name
@@ -193,6 +183,27 @@ module Sp
               @cellnames[matched_name] = dn.name
             end
           end
+        end
+
+        def get_column_type (a_worksheet, a_row_idx, a_column)
+          return 'TEXT' if a_worksheet[a_row_idx].nil? or a_worksheet[a_row_idx][a_column].nil? or a_worksheet[a_row_idx][a_column].value.nil?
+          return  a_worksheet[a_row_idx][a_column].value
+        end
+
+        def get_typed_scalar (a_cell, a_expression)
+          if a_cell.is_date?
+            return { 'type' => 'DATE', 'value' => a_expression }
+          end
+
+          case a_cell.datatype
+          when RubyXL::DataType::NUMBER
+            return { 'type' => 'DECIMAL', 'value' => a_expression }
+          when RubyXL::DataType::BOOLEAN
+            return { 'type' => 'BOOLEAN', 'value' => a_expression }
+          when RubyXL::DataType::DATE # Only available in Office2010
+            return { 'type' => 'DATE', 'value' => a_expression }
+          end
+          return { 'type' => 'TEXT', 'value' => a_expression }
         end
 
       end
