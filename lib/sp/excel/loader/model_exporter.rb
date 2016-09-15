@@ -194,9 +194,9 @@ module Sp
           if a_cell.is_date?
             return { 'type' => 'DATE', 'value' => a_expression }
           end
-
+          byebug if a_expression == 'end_month_fiscal_exercise=1212'
           case a_cell.datatype
-          when RubyXL::DataType::NUMBER
+          when RubyXL::DataType::NUMBER, nil
             return { 'type' => 'DECIMAL', 'value' => a_expression }
           when RubyXL::DataType::BOOLEAN
             return { 'type' => 'BOOLEAN', 'value' => a_expression }
