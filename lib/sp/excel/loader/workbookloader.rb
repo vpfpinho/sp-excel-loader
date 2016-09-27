@@ -175,7 +175,7 @@ module Sp
                   value = cell.value.to_i == 0 ? false : true
                 when 'DATE', 'DATE_NULLABLE'
                   begin
-                    value = DateTime.rfc3339(cell.value.to_s).to_date
+                    value = cell.value.strftime('%Y-%m-%d').to_date
                   rescue => e
                     if type == 'DATE_NULLABLE'
                       value = nil
@@ -184,7 +184,15 @@ module Sp
                     end
                   end
                 when 'DATETIME', 'DATETIME_NULLABLE'
-                  value = DateTime.rfc3339(cell.value.to_s)
+                  begin
+                    value = cell.value.strftime('%Y-%m-%d %H:%M:%S').to_datetime
+                  rescue => e
+                    if type == 'DATETIME_NULLABLE'
+                      value = nil
+                    else
+                      puts "Error in #{a_worksheet.sheet_name}!#{RubyXL::Reference.ind2ref(row,col)} #{e.message}"
+                    end
+                  end
                 else
                   value = cell.value.to_s
                 end
@@ -303,12 +311,16 @@ module Sp
                   value = cell.value.to_i == 0 ? 'false' : 'true'
                 when 'DATE', 'DATE_NULLABLE'
                   begin
-                    value = '\'' + DateTime.rfc3339(cell.value.to_s).to_s + '\''
+                    value = '\'' + cell.value.strftime('%Y-%m-%d') + '\''
                   rescue => e
                     puts "Error in table #{a_xls_table_name} #{RubyXL::Reference.ind2ref(row,col)} #{e.message} value=#{cell.value.to_s}"
                   end
                 when 'DATETIME', 'DATETIME_NULLABLE'
-                  value = DateTime.rfc3339(cell.value.to_s)
+                  begin
+                    value = '\'' + cell.value.strftime('%Y-%m-%d %H:%M:%S') + '\''
+                  rescue => e
+                    puts "Error in table #{a_xls_table_name} #{RubyXL::Reference.ind2ref(row,col)} #{e.message} value=#{cell.value.to_s}"
+                  end
                 else
                   value = '\'' + a_conn.escape_string(cell.value.to_s.strip) + '\''
                 end
