@@ -175,7 +175,11 @@ module Sp
                   value = cell.value.to_i == 0 ? false : true
                 when 'DATE', 'DATE_NULLABLE'
                   begin
-                    value = cell.value.strftime('%Y-%m-%d').to_date
+                    if cell.is_date?
+                      value = cell.value
+                    else
+                      value = Date.parse cell.value
+                    end
                   rescue => e
                     if type == 'DATE_NULLABLE'
                       value = nil
@@ -185,7 +189,11 @@ module Sp
                   end
                 when 'DATETIME', 'DATETIME_NULLABLE'
                   begin
-                    value = cell.value.strftime('%Y-%m-%d %H:%M:%S').to_datetime
+                    if cell.is_date?
+                      value = cell.value
+                    else
+                      value = Date.parse cell.value
+                    end
                   rescue => e
                     if type == 'DATETIME_NULLABLE'
                       value = nil
