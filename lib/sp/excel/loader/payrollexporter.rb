@@ -29,12 +29,8 @@ module Sp
 
         def initialize (a_file, a_typed_export)
           super(a_file, a_typed_export)
-          #@workbook        = RubyXL::Parser.parse(a_file)
           @tables          = Hash.new
           @pretty          = true
-          #@cellnames       = Hash.new
-          #@model           = Hash.new
-          #@shared_formulas = Hash.new
         end
 
         def read_untyped_table (a_worksheet, a_table, a_table_name)
