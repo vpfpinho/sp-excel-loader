@@ -108,10 +108,10 @@ module Sp
                 key, expression = cell_expression(cell)
 
                 if cell.formula
-                  scalar_formulas[key] = @typed_export ? get_typed_scalar(cell, expression) : expression
+                  scalar_formulas[key] = @typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
                 else
                   unless expression.nil?
-                    scalar_values[key] = @typed_export ? get_typed_scalar(cell, expression) : expression
+                    scalar_values[key] = @typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
                   end
                 end
               end
@@ -190,11 +190,16 @@ module Sp
           return  a_worksheet[a_row_idx][a_column].value
         end
 
-        def get_typed_scalar (a_cell, a_expression)
+        def get_typed_scalar (a_cell, a_expression, a_worksheet)
+
+          type = get_type_from_comment(a_cell.row, a_cell.column, a_worksheet)
+          unless type.nil?
+            return { 'type' => type, 'value' => a_expression }
+          end
+
           if a_cell.is_date?
             return { 'type' => 'DATE', 'value' => a_expression }
           end
-          byebug if a_expression == 'end_month_fiscal_exercise=1212'
           case a_cell.datatype
           when RubyXL::DataType::NUMBER, nil
             return { 'type' => 'DECIMAL', 'value' => a_expression }
@@ -206,8 +211,35 @@ module Sp
           return { 'type' => 'TEXT', 'value' => a_expression }
         end
 
-      end
 
+        def get_type_from_comment (a_row, a_col, a_worksheet)
+
+          if a_worksheet.comments != nil && a_worksheet.comments.size > 0 && a_worksheet.comments[0].comment_list != nil
+
+            a_worksheet.comments[0].comment_list.each do |comment|
+              if comment.ref.col_range.begin == a_col && comment.ref.row_range.begin == a_row
+                comment.text.to_s.lines.each do |text|
+                  text.strip!
+                  next if text == '' or text.nil?
+                  idx = text.index(':')
+                  next if idx.nil?
+                  tag   = text[0..(idx-1)]
+                  value = text[(idx+1)..-1]
+                  next if tag.nil? or value.nil?
+                  tag.strip!
+                  value.strip!
+
+                  if tag == 'type'
+                    return value
+                  end
+                end
+              end
+            end
+          end
+          return nil
+        end
+
+      end
     end
   end
 end
