@@ -157,7 +157,7 @@ module Sp
                                'isTitleNewPage'     => @is_title_new_page,
                                'isSummaryWithPageHeaderAndFooter' => @is_summary_with_page_header_and_footer,
                                'isFloatColumnFooter'              => @is_float_column_footer) {
-                xml.comment('created with core-excel-loader ' + @generator_version)
+                xml.comment('created with sp-excel-loader ' + @generator_version)
               }
             end
 
