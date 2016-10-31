@@ -470,6 +470,10 @@ module Sp
               @report.query_string = a_row_tag.split(':')[1].strip
             when /Id:.+/i
               @report.id = a_row_tag.split(':')[1].strip
+            when /Group.expression:.+/i
+              @report.group ||= Group.new
+              @report.group.group_expression = a_row_tag.split(':')[1].strip
+              declare_expression_entities(@report.group.group_expression)
             when /Group.isStartNewPage:.+/i
               @report.group ||= Group.new
               @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
