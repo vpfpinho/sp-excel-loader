@@ -792,7 +792,7 @@ module Sp
                 rv.pattern_expression = "$P{i18n_date_format}"
                 rv.report_element.properties << Property.new('epaper.casper.text.field.patch.pattern', 'yyyy-MM-dd') unless rv.report_element.properties.nil?
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
-                parameter.default_value_expression = '"dd-MM-yyyy"'
+                parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
               end
             end
