@@ -47,7 +47,7 @@ module Sp
             rv['name']        = @name
             rv['class']       = @java_class
             rv['calculation'] = @calculation
-            rv['resetType']   = @reset_type unless @reset_type.nil? or @reset_type != 'None'
+            rv['resetType']   = @reset_type unless @reset_type.nil? or @reset_type == 'None'
             rv['resetGroup']  = 'Group1' if @reset_type == 'Group'
             return rv
           end
