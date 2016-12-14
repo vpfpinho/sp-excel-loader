@@ -20,12 +20,80 @@
 
 require 'set'
 
+
 module Sp
   module Excel
     module Loader
       module Jrxml
 
         class ExcelToJrxml < WorkbookLoader
+
+          @@CT_IndexedColors = [ 
+            '000000', # 0
+            'FFFFFF', # 1
+            'FF0000', # 2
+            '00FF00', # 3
+            '0000FF', # 4
+            'FFFF00', # 5
+            'FF00FF', # 6
+            '00FFFF', # 7
+            '000000', # 8
+            'FFFFFF', # 9
+            'FF0000', # 10
+            '00FF00', # 11
+            '0000FF', # 12
+            'FFFF00', # 13
+            'FF00FF', # 14
+            '00FFFF', # 15 
+            '800000', # 16 
+            '008000', # 17
+            '000080', # 18
+            '808000', # 19 
+            '800080', # 20 
+            '008080', # 21
+            'C0C0C0', # 22 
+            '808080', # 23 
+            '9999FF', # 24 
+            '993366', # 25 
+            'FFFFCC', # 26 
+            'CCFFFF', # 27 
+            '660066', # 28 
+            'FF8080', # 29 
+            '0066CC', # 30
+            'CCCCFF', # 31
+            '000080', # 32 
+            'FF00FF', # 33 
+            'FFFF00', # 34 
+            '00FFFF', # 35 
+            '800080', # 36 
+            '800000', # 37 
+            '008080', # 38 
+            '0000FF', # 39 
+            '00CCFF', # 40 
+            'CCFFFF', # 41 
+            'CCFFCC', # 42 
+            'FFFF99', # 43
+            '99CCFF', # 44
+            'FF99CC', # 45
+            'CC99FF', # 46
+            'FFCC99', # 47
+            '3366FF', # 48
+            '33CCCC', # 49
+            '99CC00', # 50
+            'FFCC00', # 51
+            'FF9900', # 52
+            'FF6600', # 53
+            '666699', # 54
+            '969696', # 55
+            '003366', # 56
+            '339966', # 57
+            '003300', # 58
+            '333300', # 59
+            '993300', # 60
+            '993366', # 61
+            '333399', # 62
+            '333333'  # 63
+          ]
 
           attr_reader   :report
 
@@ -190,38 +258,39 @@ module Sp
             if xf.apply_alignment
 
               #byebug if a_style_index == 111
-              case xf.alignment.horizontal
-              when 'left', nil
-                style.h_text_align ='Left'
-              when 'center'
-                style.h_text_align ='Center'
-              when 'right'
-                style.h_text_align ='Right'
+              unless xf.alignment.nil?
+                case xf.alignment.horizontal
+                when 'left', nil
+                  style.h_text_align ='Left'
+                when 'center'
+                  style.h_text_align ='Center'
+                when 'right'
+                  style.h_text_align ='Right'
+                end
+  
+                case xf.alignment.vertical
+                when 'top'
+                  style.v_text_align ='Top'
+                when 'center'
+                  style.v_text_align ='Middle'
+                when 'bottom', nil
+                  style.v_text_align ='Bottom'
+                end
+  
+                # rotation
+                case xf.alignment.text_rotation
+                when nil
+                  style.rotation = nil
+                when 0
+                  style.rotation = 'None'
+                when 90
+                  style.rotation = 'Left'
+                when 180
+                  style.rotation = 'UpsideDown'
+                when 270
+                  style.rotation = 'Right'
+                end
               end
-
-              case xf.alignment.vertical
-              when 'top'
-                style.v_text_align ='Top'
-              when 'center'
-                style.v_text_align ='Middle'
-              when 'bottom', nil
-                style.v_text_align ='Bottom'
-              end
-
-              # rotation
-              case xf.alignment.text_rotation
-              when nil
-                style.rotation = nil
-              when 0
-                style.rotation = 'None'
-              when 90
-                style.rotation = 'Left'
-              when 180
-                style.rotation = 'UpsideDown'
-              when 270
-                style.rotation = 'Right'
-              end
-
             end
 
             return style
@@ -308,7 +377,7 @@ module Sp
                 return '#' + a_xls_color.rgb[2..-1]
               end
             else
-              return "#INDEXED TODO"
+              return '#' + @@CT_IndexedColors[a_xls_color.indexed]
             end
           end
 
