@@ -1002,7 +1002,7 @@ module Sp
             for idx in (1 .. a_col_idx - 1) do
               width += get_column_width(@worksheet, idx)
             end
-            return scale_x(width)
+            return scale_x(width).round
 
           end
 
@@ -1011,7 +1011,7 @@ module Sp
             for idx in (@first_row_in_band .. a_row_idx - 1) do
               height += @worksheet.get_row_height(idx)
             end
-            return scale_y(height)
+            return scale_y(height).round
           end
 
           def adjust_band_height ()
@@ -1021,11 +1021,11 @@ module Sp
             height = 0
             for row in @worksheet.dimension.ref.row_range
               unless @worksheet[row].nil? or @worksheet[row][0].nil? or @worksheet[row][0].value.nil? or map_row_tag(@worksheet[row][0].value) != @band_type
-                height += @worksheet.get_row_height(row)
+                height += y_for_row(row + 1) - y_for_row(row)
               end
             end
 
-            @current_band.height = scale_y(height)
+            @current_band.height = height
           end
 
           def measure_cell (a_row_idx, a_col_idx)
@@ -1050,16 +1050,18 @@ module Sp
               end
             end
 
-            return 1, 1, scale_x(get_column_width(@worksheet, a_col_idx)), scale_y(@worksheet.get_row_height(a_row_idx))
+            cell_height = y_for_row(a_row_idx + 1) -  y_for_row(a_row_idx)
+            cell_width  = x_for_column(a_col_idx + 1) - x_for_column(a_col_idx)
+            return 1, 1, cell_width, cell_height 
 
           end
 
           def scale_x (a_width)
-            return (a_width * @px_width / @raw_width).round
+            return (a_width * @px_width / @raw_width)
           end
 
           def scale_y (a_height)
-            return (a_height * @v_scale).round
+            return (a_height * @v_scale)
           end
 
 

@@ -239,7 +239,7 @@ module Sp
               end
             end
 
-            if binding != nil and binding.tooltip != nil and not binding.tooltip.strip.empty?
+            if binding != nil and binding.respond_to?(:tooltip) and binding.tooltip != nil and not binding.tooltip.strip.empty?
               widget.report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', binding.tooltip)
               a_generator.declare_expression_entities(@fields_map[a_id].tooltip)
             end
