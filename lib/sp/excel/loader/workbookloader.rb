@@ -130,7 +130,7 @@ module Sp
             when 'BOOLEAN', 'BOOLEAN_NULLABLE'
               datatype = RubyXL::DataType::BOOLEAN
               unless a_value.nil?
-                a_value = a_value == 't' ? 'TRUE' : 'FALSE'
+                a_value = a_value ? 'TRUE' : 'FALSE'
               end
             when 'DATE', 'DATE_NULLABLE'
               datatype = RubyXL::DataType::DATE
