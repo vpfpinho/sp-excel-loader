@@ -28,6 +28,7 @@ module Sp
           attr_accessor :text_field_expression
           attr_accessor :is_stretch_with_overflow
           attr_accessor :is_blank_when_null
+          attr_accessor :evaluation_time
           attr_accessor :pattern
           attr_accessor :pattern_expression
           attr_reader   :report_element
@@ -37,6 +38,7 @@ module Sp
             @text_field_expression     = nil
             @is_blank_when_null        = nil
             @is_stretch_with_overflow  = false
+            @evaluation_time           = nil
             @pattern                   = a_pattern
             @pattern_expression        = a_pattern_expression
             @report_element.properties = a_properties
@@ -47,6 +49,7 @@ module Sp
             rv['isStretchWithOverflow'] = true if @is_stretch_with_overflow
             rv['pattern']               = @pattern unless @pattern.nil?
             rv['isBlankWhenNull']       = @is_blank_when_null unless @is_blank_when_null.nil?
+            rv['evaluationTime']        = @evaluation_time unless @evaluation_time.nil?
             return rv
           end
 

@@ -918,6 +918,8 @@ module Sp
                       a_field.is_blank_when_null = to_b(value)
                     elsif tag == 'PT' or tag == 'pattern' and a_field.respond_to?(:pattern)
                       a_field.pattern = value
+                    elsif tag == 'ET' or tag == 'evaluationTime' and a_field.respond_to?(:evaluation_time)
+                      a_field.evaluation_time = value
                     elsif tag == 'DE' or tag == 'disabledExpression'
                       a_field.report_element.properties ||= Array.new
                       a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
