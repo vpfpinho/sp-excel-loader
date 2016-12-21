@@ -32,7 +32,11 @@ module Sp
           @typed_export = a_typed_export
         end
 
-        def read_model (a_sheet_name, a_table_name)
+        def read_model(a_sheet_name, a_table_name)
+          read_model_with_typed_option(a_sheet_name, a_table_name, @typed_export)
+        end
+
+        def read_model_with_typed_option(a_sheet_name, a_table_name, a_typed_export)
 
           read_cell_names(a_sheet_name)
           col_names       = Hash.new
@@ -55,7 +59,7 @@ module Sp
             type_row = ref.row_range.first() - 1
             i        = ref.col_range.first()
             tbl.table_columns.each do |table_col|
-              if @typed_export
+              if a_typed_export
                 col_names[i] = { 'name' => table_col.name, 'type' => get_column_type(worksheet, type_row, i) }
               else
                 col_names[i] = table_col.name
@@ -77,7 +81,7 @@ module Sp
             ref.col_range.each do |col|
 
               cell = worksheet[row][col]
-              if @typed_export
+              if a_typed_export
                 column = col_names[col_index]['name']
               else
                 column = col_names[col_index]
@@ -108,10 +112,10 @@ module Sp
                 key, expression = cell_expression(cell)
 
                 if cell.formula
-                  scalar_formulas[key] = @typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
+                  scalar_formulas[key] = a_typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
                 else
                   unless expression.nil?
-                    scalar_values[key] = @typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
+                    scalar_values[key] = a_typed_export ? get_typed_scalar(cell, expression, worksheet) : expression
                   end
                 end
               end
@@ -170,7 +174,7 @@ module Sp
         end
 
         def read_cell_names (a_sheet_name)
-
+          @cellnames = {}
           ref_regexp = a_sheet_name + '!\$*([A-Z]+)\$*(\d+)'
           @workbook.defined_names.each do |dn|
             next unless dn.local_sheet_id.nil?
