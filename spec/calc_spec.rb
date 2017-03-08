@@ -15,7 +15,8 @@ RSpec.describe Sp::Excel::Loader do
 
   it 'create exporter instance' do
     clean_files()
-    we = Sp::Excel::Loader.read_excel_n_save('./spec/model.xls', './spec/json/')
+    we = Sp::Excel::Loader::PayrollExporter.new('./spec/model.xls', false)
+    we.export './spec/json/'
     expect(we).to be_an_instance_of(Sp::Excel::Loader::PayrollExporter)
   end
 

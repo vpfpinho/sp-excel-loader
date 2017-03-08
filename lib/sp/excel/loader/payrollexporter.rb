@@ -83,6 +83,38 @@ module Sp
 
         end
 
+        def read_see_table (a_table_name)
+          tbl = []
+
+          tbl_instances = self.send "#{a_table_name}"
+
+          # Get all columns reading all getter methods from first instance of a_table_name
+          columns = tbl_instances.first.class.instance_methods(false).select { |method| method.to_s[-1] != '=' }
+
+          columns.each do |column|
+            col_obj  = Hash.new
+            col_data = Array.new
+
+            tbl_instances.each do |line|
+              column_value = line.send(column)
+              is_numeric = column_value.class.in?([Fixnum, BigDecimal])
+
+              # We are at the first line of table, so prepare the structure
+              if col_obj.empty?
+                col_obj['name'] = column.to_s
+                col_obj['type'] = is_numeric ? 'number' : 'text'
+                col_obj['data'] = col_data
+              end
+
+              col_data << (is_numeric ? column_value.to_f : column_value.to_s)
+            end
+
+            tbl << col_obj
+          end
+
+          tbl
+        end
+
         def read_all_untyped_tables ()
           @workbook.worksheets.each do |ws|
             ws.generic_storage.each do |tbl|
@@ -104,10 +136,6 @@ module Sp
           end
         end
 
-        def write_json_files (a_directory)
-          write_json_file(a_directory, 'model', @model)
-        end
-
         def write_json_tables (a_directory)
           a_directory = File.join(a_directory, 'tables')
           @tables.each do |name, table|
@@ -115,16 +143,26 @@ module Sp
           end
         end
 
-        def self.parse (a_path_name, a_typed_export)
-          sheet_name = 'PROCESSAMENTO'
-          we = PayrollExporter.new(a_path_name, a_typed_export)
-          we.read_all_untyped_tables
-          we.read_model(sheet_name, 'LINES')
-          we
+        def write_typed_json_tables (a_directory)
+          a_directory = File.join(a_directory, 'tables')
+          @table_names.each do |name|
+            next if name == 'LINES'
+            next if name != 'TABELA_RETROATIVOS'
+
+            write_json_file(a_directory, name, read_see_table(name))
+          end
         end
 
+        def export(a_directory)
+          self.read_all_untyped_tables # Legacy code when all tables of excel are typed
+          self.read_all_tables
+          self.write_json_file(a_directory, 'model',       self.read_model_with_typed_option('PROCESSAMENTO', 'LINES', false))
+          self.write_json_file(a_directory, 'model_typed', self.read_model_with_typed_option('PROCESSAMENTO', 'LINES', true))
+          self.write_json_tables(a_directory) # Legacy code when all tables of excel are typed
+          self.write_typed_json_tables(a_directory)
+          self
+        end
       end
-
     end
   end
 end

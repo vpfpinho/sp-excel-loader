@@ -27,12 +27,17 @@ module Sp
     module Loader
 
       class TableRow
+        def self.factory(klass_name = nil)
+          klass = Class.new(self)
+          Object.const_set(klass_name.capitalize, klass) unless klass_name.nil?
+          klass
+        end
 
         def add_attr(a_name, a_value)
+          a_name = a_name.tr(' ', '_')
           self.class.send(:attr_accessor, a_name)
           instance_variable_set("@#{a_name}", a_value)
         end
-
       end
 
       class WorkbookLoader < TableRow
@@ -43,6 +48,7 @@ module Sp
           @workbook        = RubyXL::Parser.parse(a_file)
           @cellnames       = Hash.new
           @shared_formulas = Hash.new
+          @table_names     = []
         end
 
         def read_all_tables ()
@@ -50,6 +56,7 @@ module Sp
             ws.generic_storage.each do |tbl|
               next unless tbl.is_a? RubyXL::Table
               read_typed_table(ws, tbl, tbl.name)
+              @table_names << tbl.name
             end
           end
         end
@@ -151,8 +158,10 @@ module Sp
           type_row   = header_row - 1
           records    = Array.new
 
+          klass = TableRow.factory a_table_name
+
           for row in ref.row_range.begin()+1..ref.row_range.end()
-            record = TableRow.new
+            record = klass.new
 
             ref.col_range.each do |col|
               cell = a_worksheet[row][col] unless a_worksheet[row].nil?
