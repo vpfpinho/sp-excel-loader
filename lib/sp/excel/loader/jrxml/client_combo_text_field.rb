@@ -56,8 +56,10 @@ module Sp
               a_generator.declare_expression_entities(a_binding.tooltip)
             end
 
-            unless a_binding.allow_clear.nil? or !a_binding.allow_clear
-              @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line', a_binding.allow_clear)
+            if a_binding.respond_to?(:allow_clear) 
+              unless a_binding.allow_clear.nil? or !a_binding.allow_clear
+                @report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line', a_binding.allow_clear)
+              end
             end
 
           end
