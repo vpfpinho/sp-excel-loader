@@ -41,6 +41,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 's
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'text_field'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'image'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'client_combo_text_field'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'casper_combo_text_field'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'report_element'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'jasper'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'property'))
