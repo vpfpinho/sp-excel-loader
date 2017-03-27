@@ -42,24 +42,11 @@ module Sp
               html = "<div class=\"normal\"><div class=\"left\">[[#{fields[0]}]]</div><div class=\"main\">[[#{fields[1]}]]</div></div>"
             end
 
-            if a_binding.respond_to?(:allow_clear) 
-              unless a_binding.allow_clear.nil? or !a_binding.allow_clear
-                #@report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line', a_binding.allow_clear)
-              end
-            end
-
             if a_binding.respond_to?(:cc_field_patch) and a_binding.cc_field_patch != ''
               patch_name = a_binding.cc_field_patch
             else
               patch_name = a_binding.id[3..-2]
             end
-
-            #unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
-            #  @report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', a_binding.tooltip)
-            #  a_generator.declare_expression_entities(a_binding.tooltip)
-            #end
-
-            #@report_element.properties << Property.new('epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty', 'false')
 
             binding = {
                         editable: {
@@ -74,17 +61,23 @@ module Sp
                           type: 'dropDownList',
                           version: 2,
                           controller: 'client',
-                          #mapping: {
-                          #  fields: {
-                          #    id:   a_binding.cc_field_id,
-                          #    name: field_name
-                          #  }
-                          #},
-                          route: a_binding.uri,
+                          route: a_binding.uri.gsub('"', '""'),
                           display: fields,
                           html: html
                         }
                       }
+
+            if a_binding.respond_to?(:allow_clear) 
+               unless a_binding.allow_clear.nil? or !a_binding.allow_clear
+                  binding[:attachment][:allowClear] = a_binding.allow_clear
+               end
+            end
+
+            unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
+              binding[:hint][:expression] = a_binding.tooltip
+              a_generator.declare_expression_entities(a_binding.tooltip)
+            end
+
             ap binding
             @report_element.properties << Property.new('casper.binding', binding.to_json)
 
