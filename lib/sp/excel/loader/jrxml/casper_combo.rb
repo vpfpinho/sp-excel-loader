@@ -23,7 +23,7 @@ module Sp
     module Loader
       module Jrxml
 
-        class CasperComboTextField < TextField
+        class CasperCombo < TextField # TODO < CasperTextField
 
           def initialize (a_binding, a_generator)
             super(Array.new, a_binding.presentation.format, nil)
@@ -78,7 +78,6 @@ module Sp
               a_generator.declare_expression_entities(a_binding.tooltip)
             end
 
-            ap binding
             @report_element.properties << Property.new('casper.binding', binding.to_json)
 
           end

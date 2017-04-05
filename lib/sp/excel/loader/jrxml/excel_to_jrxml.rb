@@ -112,16 +112,17 @@ module Sp
             @band_split_type             = nil
             @basic_expressions           = false
             @allow_sub_bands             = a_allow_sub_bands
+            @bindings                    = a_fields_map
 
             # If the field map is not supplied load aux tables from the same excel
-            if a_fields_map.nil?
-              a_fields_map = Hash.new
+            if @bindings.nil?
+              @bindings = Hash.new
 
               # Load parameters config table if it exists
               if respond_to?('params_def') and not params_def.nil?
                 params_def.each do |param|
                   param.presentation = Presentation.new(param.presentation)
-                  a_fields_map[param.id] = param
+                  @bindings[param.id] = param
                 end
               end
 
@@ -129,7 +130,7 @@ module Sp
               if respond_to?('fields_def') and not fields_def.nil?
                 fields_def.each do |field|
                   field.presentation = Presentation.new(field.presentation)
-                  a_fields_map[field.id] = field
+                  @bindings[field.id] = field
                 end
               end
 
@@ -149,7 +150,7 @@ module Sp
 
             end
 
-            @widget_factory             = WidgetFactory.new(a_fields_map)
+            @widget_factory             = WidgetFactory.new(@bindings)
             @widget_factory.cb_editable = a_enable_cb_or_rb_edition
             @widget_factory.rb_editable = a_enable_cb_or_rb_edition
 
@@ -627,7 +628,7 @@ module Sp
                   next
                 end
 
-                field = create_field(row[col_idx])
+                field = create_field_with_casper_binding(row[col_idx])
                 field.report_element.x = x_for_column(col_idx)
                 field.report_element.y = y_for_row(a_row_idx)
                 field.report_element.width  = cell_width
@@ -740,7 +741,164 @@ module Sp
             return false
           end
 
-          def create_field (a_cell)
+          def create_field_with_casper_binding (a_cell)
+
+            fid = nil
+            expression = a_cell.value.to_s.strip
+            binding    = @bindings[expression]
+
+            unless binding.nil?
+              case binding.widget
+              when 'Combo'
+                rv = CasperCombo.new(binding, self)
+              when 'Date'
+                rv = CasperDate.new(binding, self, expression)
+                parameter = Parameter.new('i18n_date_format', 'java.lang.String')
+                parameter.default_value_expression = '"dd/MM/yyyy"'
+                @report.parameters['i18n_date_format'] = parameter
+              when ''
+                
+              else
+                puts "Can't handle this shit #{binding.widget}"
+              end
+            end
+            unless rv 
+              case expression.delete(' ')
+              when /\A\$CB{.+}\z/
+                rv = CasperCheckbox.new(@bindings, self, expression)
+
+              when /\A\$RB{.+}\z/
+                rv = CasperRadioButton.new(@bindings, self, expression)
+
+              when /\A\$SE{.+}\z/
+                declare_expression_entities(expression)
+                rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+                rv.text_field_expression = expression[4..expression.length-2]
+
+              else
+                puts "**** Other shit *** #{expression}"
+              end
+
+            end
+
+            unless rv
+              rv = StaticText.new
+              rv.text = expression
+            end
+
+            return rv
+
+            if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
+
+              # parameter
+              f_id                     = expression.strip
+              rv                       = @widget_factory.new_for_field(f_id, self)
+              rv.text_field_expression = expression
+
+              add_parameter(f_id, m[1])
+
+            elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
+
+              # field
+              f_id                     = expression.strip
+              rv                       = @widget_factory.new_for_field(f_id, self)
+              rv.text_field_expression = expression
+
+              add_field(f_id.strip, m[1])
+
+            elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
+
+              # variable
+              f_id                     = expression.strip
+              rv                       = @widget_factory.new_for_field(f_id, self)
+              rv.text_field_expression = expression
+
+              add_variable(f_id, m[1])
+
+            #elsif ! (m = /\A\$C{(.+)}\z/.match expression.strip).nil?
+
+              # combo
+            #  combo = @widget_factory.new_combo(expression.strip)
+            #  rv    = combo[:widget]
+            #  f_id  = combo[:field]
+            #  f_nm  = f_id[3..f_id.length-2]
+            #  d_fld = nil != combo[:display_field] ? combo[:display_field] : "name"
+
+            #  if f_id.match(/^\$P{/)
+            #    add_parameter(f_id, f_nm)
+            #  elsif combo[:field].match(/^\$F{/)
+            #    add_field(f_id, f_nm)
+            #  elsif combo[:field].match(/^\$V{/)
+            #    add_variable(f_id, f_nm)
+            #  else
+            #    raise ArgumentError, "Don't know how to add '#{f_id}'!"
+            #  end
+            #
+            #  rv.text_field_expression = "TABLE_ITEM(\"#{combo[:id]}\";\"id\";#{f_id};\"#{d_fld}\")"
+
+            #elsif expression.match(/^\$CB{/)
+            #
+            #  # checkbox
+            #  checkbox = @widget_factory.new_checkbox(expression.strip)
+            #  declare_expression_entities(expression.strip)
+            #  rv = checkbox[:widget]
+            #
+            #elsif expression.match(/^\$RB{/)
+            #
+            #  # radio button
+            #  declare_expression_entities(expression.strip)
+            #  radio_button = @widget_factory.new_radio_button(expression.strip)
+            #  rv = radio_button[:widget]
+
+            elsif expression.match(/^\$DE{/)
+
+              declare_expression_entities(expression.strip)
+              de = expression.strip.split(',')
+              de[0] = de[0][4..de[0].length-1]
+              de[1] = de[1][0..de[1].length-2]
+
+              properties = [
+                              Property.new("epaper.casper.text.field.editable", "false"),
+                              Property.new("epaper.casper.text.field.editable.field_name", de[0][3..de[0].length-2])
+                           ]
+
+              rv = TextField.new(a_properties = properties, a_pattern = nil, a_pattern_expression = nil)
+              rv.text_field_expression = de[1]
+
+            #elsif expression.match(/^\$SE{/)
+            #
+            #  declare_expression_entities(expression.strip)
+            #  expression = expression.strip
+            #  rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+            #  rv.text_field_expression = expression[4..expression.length-2]
+
+            elsif expression.match(/^\$I{/)
+
+              rv = Image.new()
+
+              # copy cell alignment to image
+              style = @report.styles['style_' + (a_cell.style_index + 1).to_s]
+              rv.v_align = style.v_text_align
+              rv.h_align = style.h_text_align
+
+              unless expression.nil?
+                expression = expression.strip
+                rv.image_expression = transform_expression(expression[3..expression.length-2])
+              end
+
+            elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'
+
+              expression = transform_expression(expression)
+              rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+              rv.text_field_expression = expression.strip
+
+            else
+
+            end
+
+          end
+
+          def create_field_legacy_mode (a_cell)
 
             fid = nil
             expression = a_cell.value.to_s
@@ -921,19 +1079,35 @@ module Sp
                     elsif tag == 'ET' or tag == 'evaluationTime' and a_field.respond_to?(:evaluation_time)
                       a_field.evaluation_time = value
                     elsif tag == 'DE' or tag == 'disabledExpression'
-                      a_field.report_element.properties ||= Array.new
-                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
-                      transform_expression(value) # to force declaration of paramters/fields/variables
+                      if a_field.respond_to? :disabled_expression
+                        a_field.disabled_expression(value)
+                      else
+                        a_field.report_element.properties ||= Array.new
+                        a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
+                      end
+                      transform_expression(value) # to force declaration of parameters/fields/variables
                     elsif tag == 'SE' or tag == 'styleExpression'
-                      a_field.report_element.properties ||= Array.new
-                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
-                      transform_expression(value) # to force declaration of paramters/fields/variables
+                      if a_field.respond_to? :style_expression
+                        a_field.style_expression(value)
+                      else
+                        a_field.report_element.properties ||= Array.new
+                        a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
+                      end
+                      transform_expression(value) # to force declaration of parameters/fields/variables
                     elsif tag == 'RIC' or tag == 'reloadIfChanged'
-                      a_field.report_element.properties ||= Array.new
-                      a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
+                      if a_field.respond_to? :reload_if_changed
+                        a_field.reload_if_changed(value)
+                      else
+                        a_field.report_element.properties ||= Array.new
+                        a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
+                      end
                     elsif tag == 'EE' or tag == 'editableExpression'
-                      a_field.report_element.properties ||= Array.new
-                      a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.editable.if', value)
+                      if a_field.respond_to? :editable_expression
+                        a_field.editable_expression(value)
+                      else
+                        a_field.report_element.properties ||= Array.new
+                        a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.editable.if', value)
+                      end
                       transform_expression(value) # to force declaration of paramters/fields/variables
                     end
                   end

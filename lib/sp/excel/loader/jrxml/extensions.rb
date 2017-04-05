@@ -220,13 +220,15 @@ module Sp
               editable = nil
             end
 
-            if binding != nil and binding.respond_to?(:widget) and (binding.widget == 'Client Combo' ||  binding.widget == 'Combo')
+            if binding != nil and binding.respond_to?(:widget) and (binding.widget == 'Client Combo' ||  binding.widget == 'Combo' || binding.widget == 'Date' )
 
               case binding.widget
               when 'Client Combo'
                 widget = ClientComboTextField.new(binding, a_generator)
               when 'Combo'
                 widget = CasperComboTextField.new(binding, a_generator)
+              when 'Date'
+                widget = CasperDateTextField.new(binding, a_generator)
               end
 
             else
