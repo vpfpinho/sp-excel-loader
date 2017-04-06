@@ -1,0 +1,143 @@
+{
+    "editable": {
+        "patch": {
+            "field": {
+                "type": "java.lang.Integer",
+                "name": "third_party_id"
+            }
+        }
+    },
+    "attachment": {
+        "type": "dropDownList",
+        "version": 2,
+        "controller": "client",
+        "mapping": {
+            "fields": {
+                "id": "id",
+                "name": "description"
+            }
+        },
+        "route": "transaction_third_party_entities?filter[third_party_type]=$P{third_party_control_id}",
+        "display": ["tax_registration_number", "description"],
+        "html": "<div class=\"justify\"><div class=\"main\">[[description]]</div><div class=\"right\">NIF: [[tax_registration_number]]</div></div>"
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+{
+    "editable": {
+        "conditionals": {
+            "reload": true
+        }
+    },
+    "hint": {
+        "expression": "$F{vat_code_description}"
+    },
+    "attachment": {
+        "type": "dropDownList",
+        "version": 2,
+        "controller": "client",
+        "mapping": {
+            "fields": {
+                "id": "id",
+                "name": "description"
+            }
+        },
+        "addEmptyLine": true,
+        "pickFirstIfEmpty": false,
+        "route": "vat_codes_for_account?filter[account_id]=$F{account_id}&filter[document_type]=$P{accounting_document_type_id}",
+        "display": ["id", "description"],
+        "html": "<div class=\"normal\"><div class=\"left\">[[id]]</div><div class=\"main\">[[description]]</div></div>"
+    }
+}
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+{
+    "editable": {
+        "displayPattern": ""
+    },
+    "hint": {
+        "expression":"$F{account_description}",
+        "clientHint": "[[description]]"
+    },
+    "attachment": {
+        "type": "dropDownTree",
+        "version": 2,
+        "ledgerMode": true,
+        "parentId": "$F{parent_id}",
+        "topRoute": "general_ledger?fields[general_ledger]=description,parent_id,is_integrator&filter=\"\"parent_id is null\"\"",
+        "route": "general_ledger?fields[general_ledger]=description,parent_id,is_integrator&filter=\"\"parent_id=$F{parent_id}\"\"",
+        "display": ["id", "description"],
+        "pickFirstIfEmpty": true,
+        "mapping": {
+            "fields": {
+                "id": "id",
+                "name": "description"
+            }
+        },
+        "html": "<div class=\"normal\"><div class=\"left\">[[id]]</div><div class=\"main\">[[description]]</div></div>"
+    }
+}
+
+------------------ Ruas Annex A TRAB suplementar ------------------
+
+{
+    "editable": {
+        "field": {
+            "name": "trab_suplementar"
+        }
+    },
+    "attachment": {
+        "type": "radioButton",
+        "value": {
+            "type": "java.lang.String",
+            "on": "S",
+            "off": "N"
+        }
+    }
+}
+
+{
+    "editable": {
+        "field": {
+            "name": "trab_suplementar"
+        }
+    },
+    "attachment": {
+        "type": "radioButton",
+        "value": {
+            "type": "java.lang.String",
+            "on": "N",
+            "off": "S"
+        }
+    }
+}
+
+--------------- Model 22 ----------------------
+
+{
+    "editable": {
+        "patch": {
+            "field": {
+                "type": "java.lang.Integer",
+                "name": "anexod_t3_ft031a1"
+            }
+        }
+    },
+    "attachment": {
+        "type": "dropDownList",
+        "version": 2,
+        "controller": "client",
+        "mapping": {
+            "fields": {
+                "code": "code",
+                "name": "description"
+            }
+        },
+        "route": "model_22_combos?filter[field]=anexod_t3_ft031a1",
+        "display": ["code", "description"],
+        "html": "<div class=\"normal\"><div class=\"left\">[[code]]</div><div class=\"main\">[[description]]</div></div>"
+    }
+}

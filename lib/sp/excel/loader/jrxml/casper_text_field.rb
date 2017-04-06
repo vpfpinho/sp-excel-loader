@@ -27,9 +27,11 @@ module Sp
 
           attr_reader :casper_binding
 
-          def initialize (a_bindings, a_generator, a_expression)
+          def initialize (a_generator, a_expression)
             super(Array.new, nil, nil)
             @value_types = Array.new
+            a_generator.declare_expression_entities(a_expression)
+            @text_field_expression = a_expression
             @casper_binding = {}
           end
 
@@ -57,21 +59,51 @@ module Sp
             rv
           end
 
-
-          def disabled_expression (value)
-            #a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)
+          def to_xml (a_node)
+            puts '======================================================================================='
+            puts "TextField = '#{@text_field_expression}'" 
+            if  @casper_binding.size != 0
+              puts 'casper-binding:'
+              ap  @casper_binding
+              @report_element.properties << Property.new('casper.binding', @casper_binding.to_json)
+            end
+            super(a_node)
           end
 
-          def style_expression (value)
-            #a_field.report_element.properties << PropertyExpression.new('epaper.casper.style.condition', value)
+          def editable_conditional (a_value)
+            @casper_binding[:conditionals] ||= {}
+            @casper_binding[:conditionals][:is] = a_value
+          end
+
+          def disabled_conditional (a_value)
+            @casper_binding[:conditionals] ||= {}
+            @casper_binding[:conditionals][:disabled] = a_value
+          end
+
+          def locked_conditional (a_value)
+            @casper_binding[:conditionals] ||= {}
+            @casper_binding[:conditionals][:locked] = a_value
+          end
+
+          def enabled_conditional (a_value)
+            @casper_binding[:conditionals] ||= {}
+            @casper_binding[:conditionals][:enabled] = a_value
+          end
+
+          def style_expression (a_value)
+            @casper_binding[:style] ||= {}
+            @casper_binding[:style][:overload] ||= {}
+            @casper_binding[:style][:overload][:condition] = a_value
           end
           
-          def reload_if_changed (value)
-            #a_field.report_element.properties << Property.new('epaper.casper.text.field.reload.if_changed', value)
+          def reload_if_changed (a_value)
+            @casper_binding[:conditionals] |= {}
+            @casper_binding[:conditionals][:reload] = a_value
           end
             
-          def editable_expression (value)
-            # a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.editable.if', value)
+          def editable_expression (a_value)
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:expression]  = a_value 
           end
 
         end

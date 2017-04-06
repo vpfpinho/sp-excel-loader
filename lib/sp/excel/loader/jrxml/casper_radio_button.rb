@@ -36,8 +36,8 @@ module Sp
           #
           # Radio Button: $RB{<field_name>,<unchecked>,<checked>}
           #
-          def initialize (a_bindings, a_generator, a_expression)
-            super(a_bindings, a_generator, a_expression)
+          def initialize (a_generator, a_expression)
+            super(a_generator, a_expression)
           end
 
         end

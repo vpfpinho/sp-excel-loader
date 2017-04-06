@@ -1,0 +1,119 @@
+http://jsfiddle.net/z4VJq/2/
+
+{
+    "load": {
+        "route": "epaper.casper.text.field.load.uri",
+        "filter": {
+            "field": "paper.casper.text.field.load.uri.filter.field",
+            "id": "epaper.casper.text.field.load.uri.filter.id",
+            "name": "epaper.casper.text.field.load.uri.filter.name"
+        }
+    },
+    "hint": {
+        "expression": "epaper.casper.text.field.hint.expression",
+        "field": {
+            "name": "epaper.casper.text.field.hint.field"
+        }
+    },
+    "editable": {
+        "expression": "epaper.casper.text.field.editable.expression.field",
+        "field": {
+            "name": "epaper.casper.text.field.editable.field_name"
+        },
+        "patch": {
+            "field": {
+                "type": "epaper.casper.text.field.patch.type",
+                "name": "epaper.casper.text.field.patch.name",
+                "pattern": "epaper.casper.text.field.patch.pattern"
+            }
+        },
+        "conditionals": {
+            "is": "epaper.casper.text.field.editable",
+            "locked": "epaper.casper.text.field.editable.locked",
+            "enabled": "epaper.casper.text.field.editable.if",
+            "disabled": "epaper.casper.text.field.disabled.if",
+            "reload": "epaper.casper.text.field.reload.if_changed"
+        }
+    },
+    "style": {
+        "overload": {
+            "condition": "epaper.casper.style.condition"
+        }
+    },
+    "layout": {
+        "properties": {
+            "translation_y": "epaper.casper.translation.y",
+            "min_bottom_margin": "epaper.casper.minimum.bottom.margin"
+        },
+        "pdf": {
+            "hide_signature_widget": "epaper.casper.pdf.signature.widget.hide"
+        }
+    },
+    "attachment": null,
+}
+
+Attachments:
+[
+    {
+        "type": "datePicker",
+        "date": "",
+        "minimum": "yyyy-mm-dd",
+        "maximum": "yyyy-mm-dd",
+        "pattern": "epaper.casper.text.field.patch.pattern"
+    },
+    {
+        "type": "dropdownList",
+        "mapping": {
+            "fields": {
+                "id": "epaper.casper.text.field.attach.drop-down_list.field.id",
+                "name": "epaper.casper.text.field.attach.drop-down_list.field.name"
+            }
+        },
+        "controler": "epaper.casper.text.field.attach.drop-down_list.controller",
+        "display": "epaper.casper.text.field.attach.drop-down_list.controller.display",
+        "addEmptyLine": "epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line",
+        "pickFirstIfEmpty": "epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty",
+        "open": {
+            "route": "epaper.casper.text.field.attach.drop-down_list.controller.open.uri",
+            "jrxml": "epaper.casper.text.field.attach.drop-down_list.controller.open.jrxml"
+        },
+        "version": "epaper.casper.text.field.attach.drop-down_list.version"
+    }, {
+        "type": "treeList",
+        "mapping": {
+            "fields": {
+                "id": "epaper.casper.text.field.attach.tree_list.field.id",
+                "name": "epaper.casper.text.field.attach.tree_list.field.name"
+            }
+        },
+        "display": "epaper.casper.text.field.attach.tree_list.controller.display"
+    }, {
+        "type": "checkbox",
+        "value": {
+            "type": "epaper.casper.text.field.attach.checkbox.value.type",
+            "on": "epaper.casper.text.field.attach.checkbox.value.on",
+            "off": "epaper.casper.text.field.attach.checkbox.value.off"
+        }
+    }, {
+        "type": "radioButton",
+        "value": {
+            "type": "epaper.casper.text.field.attach.radio_button.value.type",
+            "on": "epaper.casper.text.field.attach.radio_button.value.on",
+            "off": "epaper.casper.text.field.attach.radio_button.value.off"
+        }
+    }, {
+        "type": "button",
+        "value": {
+            "route": "epaper.casper.text.field.attach.button.open.uri",
+            "jrxml": "epaper.casper.text.field.attach.button.open.jrxml"
+        }
+    }, {
+        "type": "band",
+        "add": {
+            "attr_name": "epaper.casper.band.patch.op.add.attribute.name",
+            "enabled": "epaper.casper.band.patch.op.add.enabled",
+            "seqno_name": "epaper.casper.band.patch.op.add.attribute.seqno.name"
+        }
+    }
+]
+

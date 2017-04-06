@@ -96,6 +96,7 @@ module Sp
           ]
 
           attr_reader   :report
+          attr_reader   :bindings
 
           def initialize (a_excel_filename, a_fields_map = nil, a_enable_cb_or_rb_edition=false, write_jrxml = true, a_allow_sub_bands = true)
             super(a_excel_filename)
@@ -750,9 +751,9 @@ module Sp
             unless binding.nil?
               case binding.widget
               when 'Combo'
-                rv = CasperCombo.new(binding, self)
+                rv = CasperCombo.new(self, expression)
               when 'Date'
-                rv = CasperDate.new(binding, self, expression)
+                rv = CasperDate.new(self, expression)
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
                 parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
@@ -762,24 +763,45 @@ module Sp
                 puts "Can't handle this shit #{binding.widget}"
               end
             end
+
             unless rv 
-              case expression.delete(' ')
+              case expression
               when /\A\$CB{.+}\z/
-                rv = CasperCheckbox.new(@bindings, self, expression)
+                rv = CasperCheckbox.new(self, expression)
 
               when /\A\$RB{.+}\z/
-                rv = CasperRadioButton.new(@bindings, self, expression)
+                rv = CasperRadioButton.new(self, expression)
+
+              when /\A\$P{([a-zA-Z0-9_\-#]+)}\z/, 
+                   /\A\$F{([a-zA-Z0-9_\-#]+)}\z/,
+                   /\A\$V{([a-zA-Z0-9_\-#]+)}\z/
+                rv = CasperTextField.new(self, expression)
+
+              when /.*\$[PFV]{.+}.*/
+                rv = CasperTextField.new(self, transform_expression(expression))
 
               when /\A\$SE{.+}\z/
-                declare_expression_entities(expression)
-                rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-                rv.text_field_expression = expression[4..expression.length-2]
+                rv = CasperTextField.new(self, expression[4..-2])
+
+              when /\A\$I{.+}\z/
+                rv = Image.new()
+
+                # copy cell alignment to image
+                style = @report.styles['style_' + (a_cell.style_index + 1).to_s]
+                rv.v_align = style.v_text_align
+                rv.h_align = style.h_text_align
+
+                unless expression.nil?
+                  rv.image_expression = transform_expression(expression[3..expression.length-2])
+                end
 
               else
                 puts "**** Other shit *** #{expression}"
               end
 
             end
+
+            byebug if not rv.nil? and rv.text_field_expression.nil?
 
             unless rv
               rv = StaticText.new
@@ -790,30 +812,30 @@ module Sp
 
             if ! (m = /\A\$P{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
-              # parameter
-              f_id                     = expression.strip
-              rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = expression
+            # parameter
+            #  f_id                     = expression.strip
+            #  rv                       = @widget_factory.new_for_field(f_id, self)
+            #  rv.text_field_expression = expression
 
-              add_parameter(f_id, m[1])
+            # add_parameter(f_id, m[1])
 
-            elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
+            #elsif ! (m = /\A\$F{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
               # field
-              f_id                     = expression.strip
-              rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = expression
+              #f_id                     = expression.strip
+              #rv                       = @widget_factory.new_for_field(f_id, self)
+              #rv.text_field_expression = expression
 
-              add_field(f_id.strip, m[1])
+              #add_field(f_id.strip, m[1])
 
-            elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
+            #elsif ! (m = /\A\$V{([a-zA-Z0-9_\-#]+)}\z/.match expression.strip).nil?
 
               # variable
-              f_id                     = expression.strip
-              rv                       = @widget_factory.new_for_field(f_id, self)
-              rv.text_field_expression = expression
+              #f_id                     = expression.strip
+              #rv                       = @widget_factory.new_for_field(f_id, self)
+              #rv.text_field_expression = expression
 
-              add_variable(f_id, m[1])
+              #add_variable(f_id, m[1])
 
             #elsif ! (m = /\A\$C{(.+)}\z/.match expression.strip).nil?
 
@@ -872,25 +894,25 @@ module Sp
             #  rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
             #  rv.text_field_expression = expression[4..expression.length-2]
 
-            elsif expression.match(/^\$I{/)
+            #elsif expression.match(/^\$I{/)
 
-              rv = Image.new()
+            #  rv = Image.new()
 
               # copy cell alignment to image
-              style = @report.styles['style_' + (a_cell.style_index + 1).to_s]
-              rv.v_align = style.v_text_align
-              rv.h_align = style.h_text_align
+            #  style = @report.styles['style_' + (a_cell.style_index + 1).to_s]
+            #  rv.v_align = style.v_text_align
+            #  rv.h_align = style.h_text_align
 
-              unless expression.nil?
-                expression = expression.strip
-                rv.image_expression = transform_expression(expression[3..expression.length-2])
-              end
+            #  unless expression.nil?
+            #    expression = expression.strip
+            #    rv.image_expression = transform_expression(expression[3..expression.length-2])
+            #  end
 
-            elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'
+            #elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'
 
-              expression = transform_expression(expression)
-              rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
-              rv.text_field_expression = expression.strip
+            #  expression = transform_expression(expression)
+            #  rv = TextField.new(a_properties = nil, a_pattern = nil, a_pattern_expression = nil)
+            #  rv.text_field_expression = expression.strip
 
             else
 
@@ -1079,8 +1101,8 @@ module Sp
                     elsif tag == 'ET' or tag == 'evaluationTime' and a_field.respond_to?(:evaluation_time)
                       a_field.evaluation_time = value
                     elsif tag == 'DE' or tag == 'disabledExpression'
-                      if a_field.respond_to? :disabled_expression
-                        a_field.disabled_expression(value)
+                      if a_field.respond_to? :disabled_conditional
+                        a_field.disabled_conditional(value)
                       else
                         a_field.report_element.properties ||= Array.new
                         a_field.report_element.properties << PropertyExpression.new('epaper.casper.text.field.disabled.if', value)

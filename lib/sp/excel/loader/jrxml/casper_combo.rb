@@ -23,10 +23,10 @@ module Sp
     module Loader
       module Jrxml
 
-        class CasperCombo < TextField # TODO < CasperTextField
+        class CasperCombo < CasperTextField
 
-          def initialize (a_binding, a_generator)
-            super(Array.new, a_binding.presentation.format, nil)
+          def initialize (a_generator, a_expression)
+            super(a_generator, a_expression)
 
             if a_binding.cc_field_name[0] != '['
               field_name = a_binding.cc_field_name
@@ -48,7 +48,7 @@ module Sp
               patch_name = a_binding.id[3..-2]
             end
 
-            binding = {
+            @casper_binding = {
                         editable: {
                           patch: {
                             field: {
@@ -68,22 +68,20 @@ module Sp
                       }
 
             if a_binding.respond_to?(:allow_clear) 
-               unless a_binding.allow_clear.nil? or !a_binding.allow_clear
-                  binding[:attachment][:allowClear] = a_binding.allow_clear
-               end
+              unless a_binding.allow_clear.nil? or !a_binding.allow_clear
+                @casper_binding[:attachment][:allowClear] = a_binding.allow_clear
+              end
             end
 
+            # Todo move to supper call we can have tool tips in other fields too
             unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
-              binding[:hint][:expression] = a_binding.tooltip
+              @casper_binding[:hint][:expression] = a_binding.tooltip
               a_generator.declare_expression_entities(a_binding.tooltip)
             end
-
-            @report_element.properties << Property.new('casper.binding', binding.to_json)
 
           end
 
         end
-
       end
     end
   end

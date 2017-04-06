@@ -36,8 +36,8 @@ module Sp
           #
           # check box: $CB{<field_name>,<unchecked>,<checked>}
           #
-          def initialize (a_bindings, a_generator, a_expression)
-            super(a_bindings, a_generator, a_expression)
+          def initialize (a_generator, a_expression)
+            super(a_generator, a_expression)
             
             # validade expression and extract components
             values = validation_regexp.match a_expression.delete(' ')
@@ -52,7 +52,7 @@ module Sp
             a_generator.declare_expression_entities(a_expression)
 
             # get or guess the expression type
-            binding = a_bindings[field_expr]
+            binding = a_generator.bindings[field_expr]
             if not binding.nil?
               type = binding.java_class 
               if type != @value_types[0] 
@@ -68,7 +68,7 @@ module Sp
               type = @value_types[0]
             end
 
-            casper_binding = {
+            @casper_binding = {
               editable: {
                 patch: {
                   field: {
@@ -88,10 +88,6 @@ module Sp
             }
 
             @text_field_expression = "#{field_expr} == #{on_value} ? \"X\" : \"\""
-
-            ap casper_binding
-          
-            @report_element.properties << Property.new('casper.binding', casper_binding.to_json)
 
           end
 

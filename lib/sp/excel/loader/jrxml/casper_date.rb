@@ -25,12 +25,10 @@ module Sp
 
         class CasperDate < CasperTextField
 
-          def initialize (a_binding, a_generator, expression)
-            super(Array.new, a_binding.presentation.format, nil)
-
-            a_generator.declare_expression_entities(expression)
-
-            binding = {
+          def initialize (a_generator, a_expression)
+            super(a_generator, a_expression)
+            a_generator.declare_expression_entities(a_expression)
+            @casper_binding = {
                         editable: {
                           patch: {
                             field: {
@@ -44,12 +42,14 @@ module Sp
                         }
                       }
 
-            unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
-              binding[:hint][:expression] = a_binding.tooltip
-              a_generator.declare_expression_entities(a_binding.tooltip)
+            binding = a_generator.bindings[a_expression]
+            if binding != nil and binding.tooltip != nil and not binding.tooltip.empty?
+              @casper_binding[:hint] ||= {}
+              @casper_binding[:hint][:expression] = binding.tooltip
+              a_generator.declare_expression_entities(binding.tooltip)
             end
 
-            @text_field_expression = "DateFormat.parse(#{expression},\"yyyy-MM-dd\")"
+            @text_field_expression = "DateFormat.parse(#{a_expression},\"yyyy-MM-dd\")"
             @pattern_expression = '$P{i18n_date_format}'
 
             #if !f_id.nil? && rv.is_a?(TextField)
@@ -62,8 +62,8 @@ module Sp
             #    @report.parameters['i18n_date_format'] = parameter
             #  end
             #end
-            ap binding
-            @report_element.properties << Property.new('casper.binding', binding.to_json)
+            #ap binding
+            #@report_element.properties << Property.new('casper.binding', binding.to_json)
 
           end
 
