@@ -45,8 +45,8 @@ module Sp
               raise "Invalid checkbox expression: '#{a_expression}'"
             else
               field_expr = values[1]
-              on_value   = convert_type(values[2])
-              off_value  = convert_type(values[3])
+              off_value  = convert_type(values[2])
+              on_value   = convert_type(values[3])
             end
 
             a_generator.declare_expression_entities(a_expression)
