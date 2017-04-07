@@ -29,13 +29,44 @@ module Sp
 
           def initialize (a_generator, a_expression)
             super(Array.new, nil, nil)
-            @value_types = Array.new
-            a_generator.declare_expression_entities(a_expression)
+            @value_types    = Array.new
+            @casper_binding = {} 
+            @generator      = a_generator
+            @binding        = @generator.bindings[a_expression] 
+            
+            @generator.declare_expression_entities(a_expression)
             @text_field_expression = a_expression
-            @casper_binding = {}
+
+            unless @binding.nil?
+              if @binding.respond_to? :presentation
+                pattern = @binding.presentation.format
+                if pattern != nil and not pattern.empty?
+                  if pattern.include? '$P{' or pattern.include? '$F{' or pattern.include? '$V{'
+                    @pattern_expression = pattern
+                  else
+                    @pattern = pattern
+                  end
+                end
+              end
+            end
+            update_tooltip()
           end
 
-          def convert_type a_value
+          def update_tooltip ()
+          
+            if not @binding.nil?
+              if @binding.respond_to? :tooltip
+                tooltip = @binding.tooltip
+                if not tooltip.nil? and not tooltip.empty?
+                  @generator.declare_expression_entities(tooltip.strip)
+                  @casper_binding[:hint] = { expression: tooltip.strip }
+                end
+              end
+            end
+
+          end
+
+          def convert_type (a_value)
             case a_value.to_s
             when /\A".+"\z/
               rv = a_value[1..-1]
@@ -61,7 +92,9 @@ module Sp
 
           def to_xml (a_node)
             puts '======================================================================================='
-            puts "TextField = '#{@text_field_expression}'" 
+            puts "TextField   = '#{@text_field_expression}'" 
+            puts "Pattern Exp = '#{@pattern_expression}'"    unless @pattern_expression.nil? or @pattern_expression.empty?
+            puts "Pattern     = '#{@pattern}'"               unless @pattern.nil? or @pattern.empty?
             if  @casper_binding.size != 0
               puts 'casper-binding:'
               ap  @casper_binding

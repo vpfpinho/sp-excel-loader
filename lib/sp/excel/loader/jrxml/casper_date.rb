@@ -28,43 +28,22 @@ module Sp
           def initialize (a_generator, a_expression)
             super(a_generator, a_expression)
             a_generator.declare_expression_entities(a_expression)
-            @casper_binding = {
-                        editable: {
-                          patch: {
-                            field: {
-                              pattern: 'yyyy-MM-dd'
-                            }
-                          }                        
-                        },             
-                        attachment: {
-                          type: 'datePicker',
-                          version: 2,
-                        }
-                      }
 
-            binding = a_generator.bindings[a_expression]
-            if binding != nil and binding.tooltip != nil and not binding.tooltip.empty?
-              @casper_binding[:hint] ||= {}
-              @casper_binding[:hint][:expression] = binding.tooltip
-              a_generator.declare_expression_entities(binding.tooltip)
-            end
+            @casper_binding[:editable] = {
+                patch: {
+                  field: {
+                    pattern: 'yyyy-MM-dd'
+                  }
+                }                        
+              }            
+              
+            @casper_binding[:attachment] = {
+                type: 'datePicker',
+                version: 2
+              }
 
             @text_field_expression = "DateFormat.parse(#{a_expression},\"yyyy-MM-dd\")"
             @pattern_expression = '$P{i18n_date_format}'
-
-            #if !f_id.nil? && rv.is_a?(TextField)
-            #  if @widget_factory.java_class(f_id) == 'java.util.Date'
-            #    rv.text_field_expression = "DateFormat.parse(#{rv.text_field_expression},\"yyyy-MM-dd\")"
-            #    rv.pattern_expression = "$P{i18n_date_format}"
-            #    rv.report_element.properties << Property.new('epaper.casper.text.field.patch.pattern', 'yyyy-MM-dd') unless rv.report_element.properties.nil?
-            #    parameter = Parameter.new('i18n_date_format', 'java.lang.String')
-            #    parameter.default_value_expression = '"dd/MM/yyyy"'
-            #    @report.parameters['i18n_date_format'] = parameter
-            #  end
-            #end
-            #ap binding
-            #@report_element.properties << Property.new('casper.binding', binding.to_json)
-
           end
 
         end

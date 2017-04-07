@@ -758,9 +758,9 @@ module Sp
                 parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
               when ''
-                
+                # No widget fall trought 
               else
-                puts "Can't handle this shit #{binding.widget}"
+                raise "Unknown widget type: '#{binding.widget}'"
               end
             end
 

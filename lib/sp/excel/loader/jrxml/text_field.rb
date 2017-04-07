@@ -33,7 +33,7 @@ module Sp
           attr_accessor :pattern_expression
           attr_reader   :report_element
 
-          def initialize(a_properties, a_pattern = nil, a_pattern_expression = nil)
+          def initialize (a_properties, a_pattern = nil, a_pattern_expression = nil)
             super()
             @text_field_expression     = nil
             @is_blank_when_null        = nil

@@ -28,55 +28,48 @@ module Sp
           def initialize (a_generator, a_expression)
             super(a_generator, a_expression)
 
-            if a_binding.cc_field_name[0] != '['
-              field_name = a_binding.cc_field_name
-              fields     = [ a_binding.cc_field_id, a_binding.cc_field_name ]
+            if @binding.cc_field_name[0] != '['
+              field_name = @binding.cc_field_name
+              fields     = [ @binding.cc_field_id, @binding.cc_field_name ]
             else
-              field_name = a_binding.cc_field_name[1..-2]
-              fields     = a_binding.cc_field_name[1..-2].split(',').each { |e| e.strip! }
+              field_name = @binding.cc_field_name[1..-2]
+              fields     = @binding.cc_field_name[1..-2].split(',').each { |e| e.strip! }
             end
 
-            if a_binding.respond_to?(:html)
+            if @binding.respond_to?(:html)
               html = a_binding.html
             else
               html = "<div class=\"normal\"><div class=\"left\">[[#{fields[0]}]]</div><div class=\"main\">[[#{fields[1]}]]</div></div>"
             end
 
-            if a_binding.respond_to?(:cc_field_patch) and a_binding.cc_field_patch != ''
+            if @binding.respond_to?(:cc_field_patch) and @binding.cc_field_patch != ''
               patch_name = a_binding.cc_field_patch
             else
               patch_name = a_binding.id[3..-2]
             end
 
-            @casper_binding = {
-                        editable: {
-                          patch: {
-                            field: {
-                              type: a_binding.java_class,
-                              name: patch_name
-                            }
-                          }
-                        },
-                        attachment: {
-                          type: 'dropDownList',
-                          version: 2,
-                          controller: 'client',
-                          route: a_binding.uri.gsub('"', '""'),
-                          display: fields,
-                          html: html
-                        }
-                      }
+            @casper_binding[:editable] = {
+                patch: {
+                  field: {
+                    type: a_binding.java_class,
+                    name: patch_name
+                  }
+                }
+              }
+
+            @casper_binding[:attachment] = {
+                type: 'dropDownList',
+                version: 2,
+                controller: 'client',
+                route: a_binding.uri.gsub('"', '""'),
+                display: fields,
+                html: html
+              }
 
             if a_binding.respond_to?(:allow_clear) 
               unless a_binding.allow_clear.nil? or !a_binding.allow_clear
                 @casper_binding[:attachment][:allowClear] = a_binding.allow_clear
               end
-            end
-
-            # Todo move to supper call we can have tool tips in other fields too
-            unless a_binding.tooltip.nil? or a_binding.tooltip.empty?
-              @casper_binding[:hint][:expression] = a_binding.tooltip
-              a_generator.declare_expression_entities(a_binding.tooltip)
             end
 
           end

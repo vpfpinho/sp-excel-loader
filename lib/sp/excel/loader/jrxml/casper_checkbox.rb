@@ -52,9 +52,9 @@ module Sp
             a_generator.declare_expression_entities(a_expression)
 
             # get or guess the expression type
-            binding = a_generator.bindings[field_expr]
-            if not binding.nil?
-              type = binding.java_class 
+            @binding = a_generator.bindings[field_expr]
+            if not @binding.nil?
+              type = @binding.java_class 
               if type != @value_types[0] 
                 raise "Checked value '#{on_value}' type #{@value_types[0]} does not match the binding type #{type} (#{a_expression})"
               end
@@ -67,25 +67,25 @@ module Sp
               end
               type = @value_types[0]
             end
+            update_tooltip()
 
-            @casper_binding = {
-              editable: {
+            @casper_binding[:editable] = {
                 patch: {
                   field: {
                     name: field_expr[3..-2]  
                   }
                 }
-              },
-              attachment: {
+              }
+
+            @casper_binding[:attachment] = {
                 type: attachment,
                 version: 2,
                 value: {
                   type: type,
-                  on: on_value,
-                  off: off_value
+                  on: on_value.to_s,
+                  off: off_value.to_s
                 }
               }
-            }
 
             @text_field_expression = "#{field_expr} == #{on_value} ? \"X\" : \"\""
 
