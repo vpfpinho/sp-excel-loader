@@ -220,16 +220,9 @@ module Sp
               editable = nil
             end
 
-            if binding != nil and binding.respond_to?(:widget) and (binding.widget == 'Client Combo' ||  binding.widget == 'Combo' || binding.widget == 'Date' )
+            if binding != nil and binding.respond_to?(:widget) and (binding.widget == 'Client Combo' || binding.widget == 'Combo')
 
-              case binding.widget
-              when 'Client Combo'
-                widget = ClientComboTextField.new(binding, a_generator)
-              when 'Combo'
-                widget = CasperComboTextField.new(binding, a_generator)
-              when 'Date'
-                widget = CasperDateTextField.new(binding, a_generator)
-              end
+              widget = ClientComboTextField.new(binding, a_generator)
 
             else
 
@@ -247,6 +240,7 @@ module Sp
             end
 
             if binding != nil and binding.respond_to?(:tooltip) and binding.tooltip != nil and not binding.tooltip.strip.empty?
+              widget.report_element.properties ||= Array.new
               widget.report_element.properties << PropertyExpression.new('epaper.casper.text.field.hint.expression', binding.tooltip)
               a_generator.declare_expression_entities(@fields_map[a_id].tooltip)
             end

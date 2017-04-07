@@ -37,21 +37,21 @@ module Sp
             end
 
             if @binding.respond_to?(:html)
-              html = a_binding.html
+              html = @binding.html
             else
               html = "<div class=\"normal\"><div class=\"left\">[[#{fields[0]}]]</div><div class=\"main\">[[#{fields[1]}]]</div></div>"
             end
 
             if @binding.respond_to?(:cc_field_patch) and @binding.cc_field_patch != ''
-              patch_name = a_binding.cc_field_patch
+              patch_name = @binding.cc_field_patch
             else
-              patch_name = a_binding.id[3..-2]
+              patch_name = @binding.id[3..-2]
             end
 
             @casper_binding[:editable] = {
                 patch: {
                   field: {
-                    type: a_binding.java_class,
+                    type: @binding.java_class,
                     name: patch_name
                   }
                 }
@@ -61,13 +61,13 @@ module Sp
                 type: 'dropDownList',
                 version: 2,
                 controller: 'client',
-                route: a_binding.uri.gsub('"', '""'),
+                route: @binding.uri.gsub('"', '""'),
                 display: fields,
                 html: html
               }
 
-            if a_binding.respond_to?(:allow_clear) 
-              unless a_binding.allow_clear.nil? or !a_binding.allow_clear
+            if @binding.respond_to?(:allow_clear) 
+              unless @binding.allow_clear.nil? or !a_binding.allow_clear
                 @casper_binding[:attachment][:allowClear] = a_binding.allow_clear
               end
             end

@@ -48,6 +48,11 @@ module Sp
                   end
                 end
               end
+
+              if @binding.respond_to? :editable 
+                @casper_binding[:editable] = { is: @binding.editable }
+              end
+
             end
             update_tooltip()
           end
@@ -104,23 +109,27 @@ module Sp
           end
 
           def editable_conditional (a_value)
-            @casper_binding[:conditionals] ||= {}
-            @casper_binding[:conditionals][:is] = a_value
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:conditionals] ||= {}
+            @casper_binding[:editable][:conditionals][:is] = a_value
           end
 
           def disabled_conditional (a_value)
-            @casper_binding[:conditionals] ||= {}
-            @casper_binding[:conditionals][:disabled] = a_value
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:conditionals] ||= {}
+            @casper_binding[:editable][:conditionals][:disabled] = a_value
           end
 
           def locked_conditional (a_value)
-            @casper_binding[:conditionals] ||= {}
-            @casper_binding[:conditionals][:locked] = a_value
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:conditionals] ||= {}
+            @casper_binding[:editable][:conditionals][:locked] = a_value
           end
 
           def enabled_conditional (a_value)
-            @casper_binding[:conditionals] ||= {}
-            @casper_binding[:conditionals][:enabled] = a_value
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:conditionals] ||= {}
+            @casper_binding[:editable][:conditionals][:enabled] = a_value
           end
 
           def style_expression (a_value)
@@ -130,8 +139,9 @@ module Sp
           end
           
           def reload_if_changed (a_value)
-            @casper_binding[:conditionals] |= {}
-            @casper_binding[:conditionals][:reload] = a_value
+            @casper_binding[:editable] ||= {}
+            @casper_binding[:editable][:conditionals] |= {}
+            @casper_binding[:editable][:conditionals][:reload] = a_value
           end
             
           def editable_expression (a_value)
