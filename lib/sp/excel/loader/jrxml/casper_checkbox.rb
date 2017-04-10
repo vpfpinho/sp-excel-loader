@@ -70,6 +70,7 @@ module Sp
             update_tooltip()
 
             @casper_binding[:editable] = {
+                is: @binding.editable,
                 patch: {
                   field: {
                     name: field_expr[3..-2]  

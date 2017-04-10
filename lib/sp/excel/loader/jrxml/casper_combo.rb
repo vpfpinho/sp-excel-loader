@@ -49,6 +49,7 @@ module Sp
             end
 
             @casper_binding[:editable] = {
+                is: @binding.editable,
                 patch: {
                   field: {
                     type: @binding.java_class,
