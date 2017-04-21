@@ -67,9 +67,9 @@ module Sp
                 html: html
               }
 
-            if @binding.respond_to?(:allow_clear) 
-              unless @binding.allow_clear.nil? or !a_binding.allow_clear
-                @casper_binding[:attachment][:allowClear] = a_binding.allow_clear
+            if @binding.respond_to?(:allow_clear)
+              unless @binding.allow_clear.nil? or not @binding.allow_clear
+                @casper_binding[:attachment][:allowClear] = @binding.allow_clear
               end
             end
 
