@@ -141,7 +141,7 @@ module Sp
           def reload_if_changed (a_value)
             @casper_binding[:editable] ||= {}
             @casper_binding[:editable][:conditionals] ||= {}
-            @casper_binding[:editable][:conditionals][:reload] = a_value
+            @casper_binding[:editable][:conditionals][:reload] = a_value == 'true' ? true : false
           end
             
           def editable_expression (a_value)
