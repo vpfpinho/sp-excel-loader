@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Excelloader'
   spec.description   = 'Extends RubyXL adding handling of excel tables and other conversion utilies'
   spec.authors       = ['Vitor Pinho']
-  spec.files         = Dir.glob("lib/**/*") + Dir.glob("spec/**/*") + %w(LICENSE README.md README Gemfile)
+  spec.files         = Dir.glob("lib/**/*") + Dir.glob("spec/**/*") + %w(LICENSE README.md Gemfile)
   spec.homepage      = 'https://github.com/vpfpinho/sp-excel-loader.git'
   spec.license       = 'AGPL 3.0'
   spec.require_paths = ['lib']
