@@ -764,10 +764,10 @@ module Sp
                 parameter = Parameter.new('i18n_date_format', 'java.lang.String')
                 parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
-              when ''
+              when '',nil
                 # No widget fall trought 
               else
-                raise "Unknown widget type: '#{binding.widget}'"
+                raise "Unknown widget type: '#{binding.widget}' on binding '#{binding.id}'"
               end
             end
 
