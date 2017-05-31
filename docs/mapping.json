@@ -71,7 +71,7 @@ Attachments:
         },
         "controler": "epaper.casper.text.field.attach.drop-down_list.controller",
         "display": "epaper.casper.text.field.attach.drop-down_list.controller.display",
-        "addEmptyLine": "epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line",
+        "addEmptyLine": "epaper.casper.text.field.attach.drop-down_list.controller.add.empty_line",  // 
         "pickFirstIfEmpty": "epaper.casper.text.field.attach.drop-down_list.controller.pick.first_if_empty",
         "open": {
             "route": "epaper.casper.text.field.attach.drop-down_list.controller.open.uri",

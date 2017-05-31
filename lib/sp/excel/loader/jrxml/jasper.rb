@@ -106,7 +106,7 @@ module Sp
             @is_title_new_page = false
             @is_summary_with_page_header_and_footer = true;
             @is_float_column_footer                 = true;
-            @generator_version = Sp::Excel::Loader::VERSION
+            @generator_version = Sp::Excel::Loader::VERSION.strip
             @fields['data_row_type'] = Field.new('data_row_type')
             @variables['ON_LAST_PAGE'] = Variable.new('ON_LAST_PAGE', 'java.lang.Boolean')
 

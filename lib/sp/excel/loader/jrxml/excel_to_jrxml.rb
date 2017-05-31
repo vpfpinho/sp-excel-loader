@@ -779,6 +779,9 @@ module Sp
               when /\A\$RB{.+}\z/
                 rv = CasperRadioButton.new(self, expression)
 
+              when /\A\$SE{.+}\z/
+                rv = CasperTextField.new(self, expression[4..-2])
+
               when /\A\$P{([a-zA-Z0-9_\-#]+)}\z/, 
                    /\A\$F{([a-zA-Z0-9_\-#]+)}\z/,
                    /\A\$V{([a-zA-Z0-9_\-#]+)}\z/
@@ -786,9 +789,6 @@ module Sp
 
               when /.*\$[PFV]{.+}.*/
                 rv = CasperTextField.new(self, transform_expression(expression))
-
-              when /\A\$SE{.+}\z/
-                rv = CasperTextField.new(self, expression[4..-2])
 
               when /\A\$I{.+}\z/
                 rv = Image.new()
@@ -1064,6 +1064,16 @@ module Sp
           def add_parameter (a_id, a_name)
             unless @report.parameters.has_key? a_name
               parameter = Parameter.new(a_name, @widget_factory.java_class(a_id))
+              if @bindings.has_key? a_id
+                binding = @bindings[a_id]
+                if binding.respond_to? 'default' and binding.default != nil and binding.default.strip != ''
+                  if binding.java_class == 'java.lang.String'
+                    parameter.default_value_expression = "\"#{binding.default.strip}\""
+                  else 
+                    parameter.default_value_expression = binding.default.strip
+                  end
+                end
+              end
               @report.parameters[a_name] = parameter
             end
           end

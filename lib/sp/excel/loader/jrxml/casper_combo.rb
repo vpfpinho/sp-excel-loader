@@ -39,7 +39,11 @@ module Sp
             if @binding.respond_to?(:html)
               html = @binding.html
             else
-              html = "<div class=\"normal\"><div class=\"left\">[[#{fields[0]}]]</div><div class=\"main\">[[#{fields[1]}]]</div></div>"
+              if fields.size == 1
+                html = "<div class=\"normal\"><div class=\"main\">[[#{fields[0]}]]</div></div>"
+              else
+                html = "<div class=\"normal\"><div class=\"left\">[[#{fields[0]}]]</div><div class=\"main\">[[#{fields[1]}]]</div></div>"
+              end
             end
 
             if @binding.respond_to?(:cc_field_patch) and @binding.cc_field_patch != ''
