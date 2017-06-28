@@ -129,7 +129,7 @@ module Sp
             when 'INTEGER', 'INTEGER_NULLABLE'
               datatype = RubyXL::DataType::NUMBER
               a_value  = a_value.to_i
-            when 'MONEY', 'MONEY_NULLABLE', 'DECIMAL', 'MONEY_NULLABLE'
+            when 'MONEY', 'MONEY_NULLABLE', 'DECIMAL', 'DECIMAL_NULLABLE'
               datatype = RubyXL::DataType::NUMBER
               a_value  = a_value.to_f
             when 'TEXT', 'TEXT_NULLABLE'
