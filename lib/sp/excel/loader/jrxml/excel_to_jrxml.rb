@@ -592,6 +592,9 @@ module Sp
                       @current_band.split_type = value
                     elsif tag == 'stretchType'
                       @current_band.stretch_type = value
+                    elsif tag == 'dataRowTypeAttrName'
+                      @current_band.properties ||= Array.new
+                      @current_band.properties  << Property.new("epaper.casper.band.patch.op.add.attribute.data_row_type.name", value)
                     end
                   end
                 end
