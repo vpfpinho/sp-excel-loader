@@ -187,11 +187,13 @@ module Sp
             if xf.apply_font == true
               xls_font = @workbook.fonts[xf.font_id]
 
-              if xls_font.name.val == 'Arial'
-                style.font_name = 'DejaVu Sans Condensed'
-              else
-                style.font_name = xls_font.name.val
-              end
+              # on PDF we only have one font
+              style.font_name = 'DejaVu Sans Condensed'
+              # if xls_font.name.val == 'Arial'
+              #   style.font_name = 'DejaVu Sans Condensed'
+              # else
+              #   style.font_name = xls_font.name.val
+              # end
 
               unless xls_font.color.nil?
                 style.forecolor = convert_color(xls_font.color)
