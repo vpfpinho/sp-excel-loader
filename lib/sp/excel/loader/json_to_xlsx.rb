@@ -65,7 +65,7 @@ module Sp
 
               unless @json_data['included'].nil? or @json_data['included'].size == 0
                 @json_data['included'][0]['attributes'].each do |key,val|
-                  value = value.gsub('$F{' + key +'}', val.to_s)
+                  value = value.gsub('$FN?{' + key +'}', val.to_s)
                 end
               end
               ws[row][col].change_contents(value)
@@ -76,14 +76,16 @@ module Sp
           header_row = ref.row_range.begin()
           dst_row    = header_row + 1
           fields     = Hash.new
+          null_fields = Array.new
 
           ref.col_range.each do |col|
             cell = ws[dst_row][col]
             next if cell.nil?
             next if cell.value.nil?
-            m = /\A\$F{(.+)}\z/.match cell.value.strip()
+            m = /\A\$(FN?){(.+)}\z/.match cell.value.strip()
             next if m.nil?
-            fields[col] = m[1]
+            null_fields[col] = m[1] == 'FN' ? true : false
+            fields[col] = m[2]
           end
 
           # Make space for the expanded data table, shift the merged cells down
@@ -118,7 +120,7 @@ module Sp
               fields.each do |col,field|
 
                 value = line['attributes'][field]
-                if value.nil?
+                if value.nil? and false == null_fields[col]
                   value = 0
                 end
 
