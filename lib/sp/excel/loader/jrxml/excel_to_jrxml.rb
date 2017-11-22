@@ -740,7 +740,7 @@ module Sp
                   has_border = true
                 end
               end
-              if style.mode != nil && style.mode == 'Opaque'
+              if (style.mode != nil && style.mode == 'Opaque') || style.backcolor
                 opaque = true
               end
             end
