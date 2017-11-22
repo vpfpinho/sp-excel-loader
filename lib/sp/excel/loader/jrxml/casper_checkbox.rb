@@ -62,10 +62,7 @@ module Sp
                 raise "Checked value '#{off_value}' type #{@value_types[1]} does not match the binding type #{type} (#{a_expression})"
               end
             else
-              if @value_types[0] != @value_types[1]
-                raise "Checked value '#{on_value}' type #{@value_types[0]} is different from unchecked '#{off_value}' type #{@value_types[1]} (#{a_expression})"
-              end
-              type = @value_types[0]
+              raise "Checkbox expression '#{a_expression}' requires a binding for expr '#{field_expr}'".yellow
             end
             update_tooltip()
 
