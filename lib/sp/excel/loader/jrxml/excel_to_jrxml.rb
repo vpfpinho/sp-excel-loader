@@ -787,7 +787,7 @@ module Sp
               when /\A\$SE{.+}\z/
                 rv = CasperTextField.new(self, expression[4..-2])
 
-              when /\A\$P{([a-zA-Z0-9_\-#]+)}\z/, 
+              when /\A\$P{([a-zA-Z0-9_\-#]+)}\z/,
                    /\A\$F{([a-zA-Z0-9_\-#]+)}\z/,
                    /\A\$V{([a-zA-Z0-9_\-#]+)}\z/
                 rv = CasperTextField.new(self, expression)
@@ -952,7 +952,7 @@ module Sp
 
           def declare_expression_entities (a_expression)
 
-            a_expression.scan(/\$[A-Z]{[a-z_0-9\-#]+}/) { |v|
+            a_expression.scan(/\$[A-Z]{[a-z_0-9\.\-#]+}/) { |v|
               f_id = (/\A\$[PFV]{(.+)}\z/.match v).to_s
               if false == f_id.nil?
                 f_nm = f_id[3..-2]
@@ -1042,7 +1042,7 @@ module Sp
           end
 
           def transform_expression (a_expression)
-            matches = a_expression.split(/(\$[PVF]{[a-zA-Z0-9_]+})/)
+            matches = a_expression.split(/(\$[PVF]{[a-zA-Z0-9\._]+})/)
             if matches.nil?
               return a_expression
             end
