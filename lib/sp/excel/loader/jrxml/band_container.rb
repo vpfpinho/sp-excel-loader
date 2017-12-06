@@ -223,6 +223,20 @@ module Sp
 
         end
 
+
+        class SequentialBand < BandContainer
+
+          def to_xml (a_node)
+            if @bands.size > 0
+              Nokogiri::XML::Builder.with(a_node) do |xml|
+                xml.sequential(attributes)
+              end
+              bands_to_xml(a_node.children.last)
+            end
+          end
+
+        end
+
       end
     end
   end
