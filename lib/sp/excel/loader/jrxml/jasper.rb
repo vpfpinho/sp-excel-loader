@@ -58,31 +58,27 @@ module Sp
           attr_reader   :extension
 
           # band containers
-          attr_accessor :detail
           attr_accessor :title
           attr_accessor :background
           attr_accessor :page_header
-          attr_accessor :column_header
-          attr_accessor :column_footer
           attr_accessor :page_footer
           attr_accessor :last_page_footer
           attr_accessor :summary
           attr_accessor :no_data
+          attr_accessor :body
 
           def initialize (a_name)
 
             # init data set
-            @group            = nil
-            @detail           = nil
+            #@group            = nil
             @title            = nil
             @background       = nil
             @page_header      = nil
-            @column_header    = nil
-            @column_footer    = nil
             @page_footer      = nil
             @last_page_footer = nil
             @summary          = nil
             @no_data          = nil
+            @body             = []
 
             @query_string    = 'lines'
             @parameters      = Hash.new
@@ -199,19 +195,19 @@ module Sp
             end
 
             @variables.each do |name, variable|
-              next if ['PAGE_NUMBER', 'MASTER_CURRENT_PAGE', 'MASTER_TOTAL_PAGES', 
+              next if ['PAGE_NUMBER', 'MASTER_CURRENT_PAGE', 'MASTER_TOTAL_PAGES',
                        'COLUMN_NUMBER', 'REPORT_COUNT', 'PAGE_COUNT', 'COLUMN_COUNT'].include? name
               variable.to_xml(@builder.doc.children[0])
             end
 
-            @group.to_xml(@builder.doc.children[0]) unless @group.nil?
+            #@group.to_xml(@builder.doc.children[0]) unless @group.nil?
 
             @background.to_xml(@builder.doc.children[0])       unless @background.nil?
             @title.to_xml(@builder.doc.children[0])            unless @title.nil?
             @page_header.to_xml(@builder.doc.children[0])      unless @page_header.nil?
-            @column_header.to_xml(@builder.doc.children[0])    unless @column_header.nil?
-            @detail.to_xml(@builder.doc.children[0])           unless @detail.nil?
-            @column_footer.to_xml(@builder.doc.children[0])    unless @column_footer.nil?
+            @body.each do |part|
+              part.to_xml(@builder.doc.children[0])
+            end
             @page_footer.to_xml(@builder.doc.children[0])      unless @page_footer.nil?
             @last_page_footer.to_xml(@builder.doc.children[0]) unless @last_page_footer.nil?
             @summary.to_xml(@builder.doc.children[0])          unless @summary.nil?

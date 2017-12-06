@@ -28,7 +28,7 @@ module Sp
 
         class ExcelToJrxml < WorkbookLoader
 
-          @@CT_IndexedColors = [ 
+          @@CT_IndexedColors = [
             '000000', # 0
             'FFFFFF', # 1
             'FF0000', # 2
@@ -44,34 +44,34 @@ module Sp
             '0000FF', # 12
             'FFFF00', # 13
             'FF00FF', # 14
-            '00FFFF', # 15 
-            '800000', # 16 
+            '00FFFF', # 15
+            '800000', # 16
             '008000', # 17
             '000080', # 18
-            '808000', # 19 
-            '800080', # 20 
+            '808000', # 19
+            '800080', # 20
             '008080', # 21
-            'C0C0C0', # 22 
-            '808080', # 23 
-            '9999FF', # 24 
-            '993366', # 25 
-            'FFFFCC', # 26 
-            'CCFFFF', # 27 
-            '660066', # 28 
-            'FF8080', # 29 
+            'C0C0C0', # 22
+            '808080', # 23
+            '9999FF', # 24
+            '993366', # 25
+            'FFFFCC', # 26
+            'CCFFFF', # 27
+            '660066', # 28
+            'FF8080', # 29
             '0066CC', # 30
             'CCCCFF', # 31
-            '000080', # 32 
-            'FF00FF', # 33 
-            'FFFF00', # 34 
-            '00FFFF', # 35 
-            '800080', # 36 
-            '800000', # 37 
-            '008080', # 38 
-            '0000FF', # 39 
-            '00CCFF', # 40 
-            'CCFFFF', # 41 
-            'CCFFCC', # 42 
+            '000080', # 32
+            'FF00FF', # 33
+            'FFFF00', # 34
+            '00FFFF', # 35
+            '800080', # 36
+            '800000', # 37
+            '008080', # 38
+            '0000FF', # 39
+            '00CCFF', # 40
+            'CCFFFF', # 41
+            'CCFFCC', # 42
             'FFFF99', # 43
             '99CCFF', # 44
             'FF99CC', # 45
@@ -104,6 +104,8 @@ module Sp
             report_name = File.basename(a_excel_filename, '.xlsx')
             @report = JasperReport.new(report_name)
             @current_band                = nil
+            @current_band_container      = nil
+            @current_table               = nil
             @first_row_in_band           = 0
             @band_type                   = nil
             @v_scale                     = 1
@@ -272,7 +274,7 @@ module Sp
                 when 'right'
                   style.h_text_align ='Right'
                 end
-  
+
                 case xf.alignment.vertical
                 when 'top'
                   style.v_text_align ='Top'
@@ -281,7 +283,7 @@ module Sp
                 when 'bottom', nil
                   style.v_text_align ='Bottom'
                 end
-  
+
                 # rotation
                 case xf.alignment.text_rotation
                 when nil
@@ -456,7 +458,6 @@ module Sp
           end
 
           def process_row_tag (a_row, a_row_tag)
-
             case a_row_tag
             when /CasperBinding:*/
               @use_casper_bindings = a_row_tag.split(':')[1].strip == 'true'
@@ -475,21 +476,6 @@ module Sp
               @current_band = Band.new
               @report.page_header.bands << @current_band
               @band_type = a_row_tag
-            when /CH\d*:/
-              @report.column_header ||= ColumnHeader.new
-              @current_band = Band.new
-              @report.column_header.bands << @current_band
-              @band_type = a_row_tag
-            when /DT\d*/
-              @report.detail ||= Detail.new
-              @current_band = Band.new
-              @report.detail.bands << @current_band
-              @band_type = a_row_tag
-            when /CF\d*:/
-              @report.column_footer ||= ColumnFooter.new
-              @current_band = Band.new
-              @report.column_footer.bands << @current_band
-              @band_type = a_row_tag
             when /PF\d*:/
               @report.page_footer ||= PageFooter.new
               @current_band = Band.new
@@ -506,20 +492,45 @@ module Sp
               @report.summary.bands << @current_band
               @band_type = a_row_tag
             when /ND\d*:/
-              @report.no_data ||= NoData.new
+              @current_table = switch_table(a_row_tag)
               @current_band = Band.new
-              @report.no_data.bands << @current_band
+              @current_table.no_data ||= NoData.new
+              @current_table.no_data << @current_table
+              @band_type = a_row_tag
+            when /SB\d*:/
+              @current_table = switch_table(a_row_tag)
+              @report.body << SequentialBand.new
+              @current_band = Band.new
+              @report.body[-1].bands << @current_band
+              @band_type = a_row_tag
+            when /CH\d*:/
+              @current_table = switch_table(a_row_tag)
+              @current_band = Band.new
+              @current_table.column_header ||= ColumnHeader.new
+              @current_table.column_header.bands << @current_band
+              @band_type = a_row_tag
+            when /DT\d*/
+              @current_table = switch_table(a_row_tag)
+              @current_band = Band.new
+              @current_table.detail ||= Detail.new
+              @current_table.detail.bands << @current_band
+              @band_type = a_row_tag
+            when /CF\d*:/
+              @current_table = switch_table(a_row_tag)
+              @current_band = Band.new
+              @current_table.column_footer ||= ColumnFooter.new
+              @current_table.column_footer.bands << @current_band
               @band_type = a_row_tag
             when /GH\d*:/
-              @report.group ||= Group.new
-              @current_band = Band.new
-              @report.group.group_header.bands << @current_band
-              @band_type = a_row_tag
+              #@report.group ||= Group.new
+              #@current_band = Band.new
+              #@current_table.group[-1].group_header.bands << @current_band
+              #@band_type = a_row_tag
             when /GF\d*:/
-              @report.group ||= Group.new
-              @current_band = Band.new
-              @report.group.group_footer.bands << @current_band
-              @band_type = a_row_tag
+              #@report.group ||= Group.new
+              #@current_band = Band.new
+              #@current_table.group[-1].group_footer.bands << @current_band
+              #@band_type = a_row_tag
             when /Orientation:.+/i
               @report.orientation = a_row_tag.split(':')[1].strip
               @report.update_page_size()
@@ -597,6 +608,10 @@ module Sp
                     elsif tag == 'dataRowTypeAttrName'
                       @current_band.properties ||= Array.new
                       @current_band.properties  << Property.new("epaper.casper.band.patch.op.add.attribute.data_row_type.name", value)
+                    elsif tag == 'relationship'
+                      if nil != @current_table
+                        @current_table.relationship = value
+                      end
                     end
                   end
                 end
@@ -607,12 +622,30 @@ module Sp
 
           def map_row_tag (a_row_tag)
             unless @allow_sub_bands
-              match = a_row_tag.match(/\A(TL|SU|BG|PH|CH|DT|CF|PF|LPF|ND)\d*:\z/)
+              match = a_row_tag.match(/\A(TL|SU|BG|PH|CH|DT|CF|PF|LPF|ND|SB)\d*:\z/)
               if match != nil and match.size == 2
                 return match[1] + ':'
               end
             end
             a_row_tag
+          end
+
+          def switch_table (a_row_tag)
+            if @current_table.nil?
+              if ['DT', 'CH', 'CH'].include?(a_row_tag[0..1])
+                @current_table = Table.new()
+                @report.body << @current_table
+              else
+                @current_table = nil
+              end
+            else
+              if ['CH', 'GH', 'DT', 'CF', 'GF'].include?(a_row_tag[0..1])
+                @current_table
+              else
+                @current_table = nil
+              end
+            end
+            @current_table
           end
 
           def to_b (a_value)
@@ -770,13 +803,13 @@ module Sp
                 parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
               when '',nil
-                # No widget fall trought 
+                # No widget fall trought
               else
                 raise "Unknown widget type: '#{binding.widget}' on binding '#{binding.id}'"
               end
             end
 
-            unless rv 
+            unless rv
               case expression
               when /\A\$CB{.+}\z/
                 rv = CasperCheckbox.new(self, expression)
@@ -1074,7 +1107,7 @@ module Sp
                 if binding.respond_to? 'default' and binding.default != nil and binding.default.strip != ''
                   if binding.java_class == 'java.lang.String'
                     parameter.default_value_expression = "\"#{binding.default.strip}\""
-                  else 
+                  else
                     parameter.default_value_expression = binding.default.strip
                   end
                 end
@@ -1162,7 +1195,7 @@ module Sp
 
             cell_height = y_for_row(a_row_idx + 1) -  y_for_row(a_row_idx)
             cell_width  = x_for_column(a_col_idx + 1) - x_for_column(a_col_idx)
-            return 1, 1, cell_width, cell_height 
+            return 1, 1, cell_width, cell_height
 
           end
 

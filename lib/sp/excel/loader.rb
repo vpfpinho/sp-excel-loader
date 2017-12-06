@@ -51,6 +51,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'j
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'property'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'property_expression'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'extensions'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'jrxml', 'table'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'loader', 'version'))
 
 module Sp
