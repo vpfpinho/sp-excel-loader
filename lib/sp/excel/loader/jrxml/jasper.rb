@@ -47,7 +47,6 @@ module Sp
           attr_accessor :fields
           attr_accessor :variables
           attr_accessor :builder
-          attr_accessor :group
           attr_accessor :query_string
           attr_accessor :page_width
           attr_accessor :page_height
@@ -70,7 +69,6 @@ module Sp
           def initialize (a_name)
 
             # init data set
-            #@group            = nil
             @title            = nil
             @background       = nil
             @page_header      = nil
@@ -199,8 +197,6 @@ module Sp
                        'COLUMN_NUMBER', 'REPORT_COUNT', 'PAGE_COUNT', 'COLUMN_COUNT'].include? name
               variable.to_xml(@builder.doc.children[0])
             end
-
-            #@group.to_xml(@builder.doc.children[0]) unless @group.nil?
 
             @background.to_xml(@builder.doc.children[0])       unless @background.nil?
             @title.to_xml(@builder.doc.children[0])            unless @title.nil?

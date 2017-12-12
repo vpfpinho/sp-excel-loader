@@ -106,6 +106,7 @@ module Sp
             @current_band                = nil
             @current_band_container      = nil
             @current_table               = nil
+            @current_group               = nil
             @first_row_in_band           = 0
             @band_type                   = nil
             @v_scale                     = 1
@@ -117,6 +118,7 @@ module Sp
             @allow_sub_bands             = a_allow_sub_bands
             @bindings                    = a_fields_map
             @use_casper_bindings         = false
+            @allow_multiple_tables       = false
 
             # If the field map is not supplied load aux tables from the same excel
             if @bindings.nil?
@@ -522,15 +524,15 @@ module Sp
               @current_table.column_footer.bands << @current_band
               @band_type = a_row_tag
             when /GH\d*:/
-              #@report.group ||= Group.new
-              #@current_band = Band.new
-              #@current_table.group[-1].group_header.bands << @current_band
-              #@band_type = a_row_tag
+              @current_group = switch_group(a_row_tag)
+              @current_band = Band.new
+              @current_group.group_header.bands << @current_band
+              @band_type = a_row_tag
             when /GF\d*:/
-              #@report.group ||= Group.new
-              #@current_band = Band.new
-              #@current_table.group[-1].group_footer.bands << @current_band
-              #@band_type = a_row_tag
+              @current_group = switch_group(a_row_tag)
+              @current_band = Band.new
+              @current_group.group_footer.bands << @current_band
+              @band_type = a_row_tag
             when /Orientation:.+/i
               @report.orientation = a_row_tag.split(':')[1].strip
               @report.update_page_size()
@@ -558,21 +560,23 @@ module Sp
             when /Id:.+/i
               @report.id = a_row_tag.split(':')[1].strip
             when /Group.expression:.+/i
-              @report.group ||= Group.new
-              @report.group.group_expression = a_row_tag.split(':')[1].strip
-              declare_expression_entities(@report.group.group_expression)
+              @current_group = switch_group(a_row_tag)
+              @current_group.group_expression = a_row_tag.split(':')[1].strip
+              declare_expression_entities(@current_group.group_expression)
             when /Group.isStartNewPage:.+/i
-              @report.group ||= Group.new
-              @report.group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
+              @current_group = switch_group(a_row_tag)
+              @current_group.is_start_new_page = a_row_tag.split(':')[1].strip == 'true'
             when /Group.isReprintHeaderOnEachPage:.+/i
-              @report.group ||= Group.new
-              @report.group.is_reprint_header_on_each_page = a_row_tag.split(':')[1].strip == 'true'
+              @current_group = switch_group(a_row_tag)
+              @current_group.is_reprint_header_on_each_page = a_row_tag.split(':')[1].strip == 'true'
             when /BasicExpressions:.+/i
               @widget_factory.basic_expressions = a_row_tag.split(':')[1].strip == 'true'
             when /Style:.+/i
               @report.update_extension_style(a_row_tag.split(':')[1].strip, @worksheet[a_row][2])
               @current_band = nil
               @band_type    = nil
+            when /AllowMultipleTables:*/
+              @allow_multiple_tables = a_row_tag.split(':')[1].strip == 'true'
             else
               @current_band = nil
               @band_type    = nil
@@ -632,20 +636,54 @@ module Sp
 
           def switch_table (a_row_tag)
             if @current_table.nil?
-              if ['DT', 'CH', 'CH'].include?(a_row_tag[0..1])
+              if ['DT', 'CH', 'GH'].include?(a_row_tag[0..1])
                 @current_table = Table.new()
                 @report.body << @current_table
-              else
+              elsif @allow_multiple_tables
                 @current_table = nil
               end
             else
               if ['CH', 'GH', 'DT', 'CF', 'GF'].include?(a_row_tag[0..1])
                 @current_table
-              else
+              elsif @allow_multiple_tables
                 @current_table = nil
               end
             end
             @current_table
+          end
+
+          def switch_group (a_row_tag)
+            @current_table = switch_table(a_row_tag)
+            if @current_table.nil?
+              @current_table = Table.new()
+              @report.body << @current_table
+            end
+            puts "#{a_row_tag} - #{@current_group}"
+            if @current_group.nil?
+              if ['GH', 'GF'].include?(a_row_tag[0..1])
+                @current_group = Group.new()
+                @current_table.groups << @current_group
+              else
+                row_tag = a_row_tag.strip
+                ["^Group.Expression:.*", "^Group.Expression:.*", "^Group.Expression:.*"].each do |m|
+                  if row_tag.match(m)
+                      @current_group = Group.new()
+                      @current_table.groups << @current_group
+                    break
+                  end
+                end
+              end
+            else
+              if ['GH','GF','DT'].include?(a_row_tag[0..1])
+                @current_table
+              else
+                @current_group = nil
+              end
+            end
+            if nil == @current_group
+              debugger
+            end
+            @current_group
           end
 
           def to_b (a_value)
