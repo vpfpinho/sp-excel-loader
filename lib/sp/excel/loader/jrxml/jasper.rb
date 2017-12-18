@@ -90,7 +90,7 @@ module Sp
             @paper_size        = 'A4'
             @page_width        = 595
             @page_height       = 842
-            @no_data_section   = 'NoPages'
+            @no_data_section   = 'AllSectionsNoDetail' # 2.0 default returns a page containing all bands except for the detail band.
             @column_width      = 522
             @left_margin       = 36
             @right_margin      = 37
