@@ -47,7 +47,7 @@ module Sp
           def attributes
             rv = Hash.new
             rv['isStretchWithOverflow'] = true if @is_stretch_with_overflow
-            rv['pattern']               = @pattern unless @pattern.nil?
+            rv['pattern']               = @pattern if !@pattern.nil? && @pattern.length > 0
             rv['isBlankWhenNull']       = @is_blank_when_null unless @is_blank_when_null.nil?
             rv['evaluationTime']        = @evaluation_time unless @evaluation_time.nil?
             return rv
