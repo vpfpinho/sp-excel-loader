@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright (c) 2011-2016 Servicepartner LDA. All rights reserved.
+# Copyright (c) 2011-2016 Cloudware S.A. All rights reserved.
 #
 # This file is part of sp-excel-loader.
 #
@@ -199,6 +199,8 @@ module Sp
             end
 
             @variables.each do |name, variable|
+              next if ['PAGE_NUMBER', 'MASTER_CURRENT_PAGE', 'MASTER_TOTAL_PAGES', 
+                       'COLUMN_NUMBER', 'REPORT_COUNT', 'PAGE_COUNT', 'COLUMN_COUNT'].include? name
               variable.to_xml(@builder.doc.children[0])
             end
 

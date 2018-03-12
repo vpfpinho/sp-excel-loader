@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright (c) 2011-2016 Servicepartner LDA. All rights reserved.
+# Copyright (c) 2011-2016 Cloudware S.A. All rights reserved.
 #
 # This file is part of sp-excel-loader.
 #
