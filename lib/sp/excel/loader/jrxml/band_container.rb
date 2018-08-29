@@ -153,11 +153,7 @@ module Sp
                 page_number_refs.each do |ref|
                   page_number_ref_count += 1
                   evaluation_time = ( 1 == page_number_ref_count ? "Now" : "Report" )
-                  if ref.attributes.nil?
-                    ref.attributes = { evaluationTime:"#{evaluation_time}" }
-                  else
-                    ref.attributes << { evaluationTime:"#{evaluation_time}" }
-                  end
+                  ref.evaluation_time = evaluation_time
                 end
               end
             end
