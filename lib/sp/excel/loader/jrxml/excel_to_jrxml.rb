@@ -811,7 +811,7 @@ module Sp
 
             end
 
-            byebug if not rv.nil? and rv.text_field_expression.nil?
+            byebug if not rv.nil? and rv.respond_to?(:text_field_expression) and rv.text_field_expression.nil?
 
             unless rv
               rv = StaticText.new
