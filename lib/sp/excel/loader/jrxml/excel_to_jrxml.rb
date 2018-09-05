@@ -28,7 +28,7 @@ module Sp
 
         class ExcelToJrxml < WorkbookLoader
 
-          @@CT_IndexedColors = [ 
+          @@CT_IndexedColors = [
             '000000', # 0
             'FFFFFF', # 1
             'FF0000', # 2
@@ -44,34 +44,34 @@ module Sp
             '0000FF', # 12
             'FFFF00', # 13
             'FF00FF', # 14
-            '00FFFF', # 15 
-            '800000', # 16 
+            '00FFFF', # 15
+            '800000', # 16
             '008000', # 17
             '000080', # 18
-            '808000', # 19 
-            '800080', # 20 
+            '808000', # 19
+            '800080', # 20
             '008080', # 21
-            'C0C0C0', # 22 
-            '808080', # 23 
-            '9999FF', # 24 
-            '993366', # 25 
-            'FFFFCC', # 26 
-            'CCFFFF', # 27 
-            '660066', # 28 
-            'FF8080', # 29 
+            'C0C0C0', # 22
+            '808080', # 23
+            '9999FF', # 24
+            '993366', # 25
+            'FFFFCC', # 26
+            'CCFFFF', # 27
+            '660066', # 28
+            'FF8080', # 29
             '0066CC', # 30
             'CCCCFF', # 31
-            '000080', # 32 
-            'FF00FF', # 33 
-            'FFFF00', # 34 
-            '00FFFF', # 35 
-            '800080', # 36 
-            '800000', # 37 
-            '008080', # 38 
-            '0000FF', # 39 
-            '00CCFF', # 40 
-            'CCFFFF', # 41 
-            'CCFFCC', # 42 
+            '000080', # 32
+            'FF00FF', # 33
+            'FFFF00', # 34
+            '00FFFF', # 35
+            '800080', # 36
+            '800000', # 37
+            '008080', # 38
+            '0000FF', # 39
+            '00CCFF', # 40
+            'CCFFFF', # 41
+            'CCFFCC', # 42
             'FFFF99', # 43
             '99CCFF', # 44
             'FF99CC', # 45
@@ -272,7 +272,7 @@ module Sp
                 when 'right'
                   style.h_text_align ='Right'
                 end
-  
+
                 case xf.alignment.vertical
                 when 'top'
                   style.v_text_align ='Top'
@@ -281,7 +281,7 @@ module Sp
                 when 'bottom', nil
                   style.v_text_align ='Bottom'
                 end
-  
+
                 # rotation
                 case xf.alignment.text_rotation
                 when nil
@@ -770,13 +770,13 @@ module Sp
                 parameter.default_value_expression = '"dd/MM/yyyy"'
                 @report.parameters['i18n_date_format'] = parameter
               when '',nil
-                # No widget fall trought 
+                # No widget fall trought
               else
                 raise "Unknown widget type: '#{binding.widget}' on binding '#{binding.id}'"
               end
             end
 
-            unless rv 
+            unless rv
               case expression
               when /\A\$CB{.+}\z/
                 rv = CasperCheckbox.new(self, expression)
@@ -792,9 +792,6 @@ module Sp
                    /\A\$V{([a-zA-Z0-9_\-#]+)}\z/
                 rv = CasperTextField.new(self, expression)
 
-              when /.*\$[PFV]{.+}.*/
-                rv = CasperTextField.new(self, transform_expression(expression))
-
               when /\A\$I{.+}\z/
                 rv = Image.new()
 
@@ -807,6 +804,8 @@ module Sp
                   rv.image_expression = transform_expression(expression[3..expression.length-2])
                 end
 
+              when /.*\$[PFV]{.+}.*/
+                rv = CasperTextField.new(self, transform_expression(expression))
               end
 
             end
@@ -1074,7 +1073,7 @@ module Sp
                 if binding.respond_to? 'default' and binding.default != nil and binding.default.strip != ''
                   if binding.java_class == 'java.lang.String'
                     parameter.default_value_expression = "\"#{binding.default.strip}\""
-                  else 
+                  else
                     parameter.default_value_expression = binding.default.strip
                   end
                 end
@@ -1162,7 +1161,7 @@ module Sp
 
             cell_height = y_for_row(a_row_idx + 1) -  y_for_row(a_row_idx)
             cell_width  = x_for_column(a_col_idx + 1) - x_for_column(a_col_idx)
-            return 1, 1, cell_width, cell_height 
+            return 1, 1, cell_width, cell_height
 
           end
 
