@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bank_statement" pageWidth="595" pageHeight="842" whenNoDataType="NoPages" columnWidth="522" leftMargin="36" rightMargin="37" topMargin="30" bottomMargin="30" isTitleNewPage="false" isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true">
+  <!--created with sp-excel-loader 0.3.44-->
+  <property name="epaper.casper.text.field.editable.style" value="EditableTextField"/>
+  <property name="epaper.casper.text.field.editable.style.focused" value="EditableFocusedTextField"/>
+  <property name="epaper.casper.text.field.editable.style.disabled" value="EditableDisabledTextField"/>
+  <property name="epaper.casper.text.field.editable.style.focused.invalid" value="EditableFocusedInvalidContentTextField"/>
+  <property name="epaper.casper.text.field.editable.style.invalid" value="EditableTextFieldInvalidContent"/>
+  <style name="EditableTextFieldInvalidContent" style="EditableTextField" isBlankWhenNull="true">
+    <box padding="1">
+      <bottomPen lineWidth="1" lineStyle="Solid" lineColor="#E44A2C"/>
+    </box>
+  </style>
+  <style name="EditableFocusedInvalidContentTextField" style="EditableFocusedTextField" isBlankWhenNull="true">
+    <box padding="1">
+      <bottomPen lineWidth="1" lineStyle="Solid" lineColor="#E44A2C"/>
+    </box>
+  </style>
+  <style name="EditableDisabledTextField" mode="Opaque" backcolor="#F2F2F2" forecolor="#C7C7C7" isBlankWhenNull="true">
+    <box padding="1">
+      <bottomPen lineWidth="1" lineStyle="Dashed" lineColor="#000000"/>
+    </box>
+  </style>
+  <style name="style_31" vTextAlign="Middle" hTextAlign="Left" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true"/>
+  <style name="style_32" vTextAlign="Middle" hTextAlign="Right" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true"/>
+  <style name="style_34" vTextAlign="Middle" hTextAlign="Center" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true"/>
+  <style name="style_35" backcolor="#FFFFFF" mode="Opaque" vTextAlign="Middle" hTextAlign="Right" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="style_36" vTextAlign="Middle" hTextAlign="Right" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="style_41" vTextAlign="Middle" hTextAlign="Right" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true"/>
+  <style name="style_43" forecolor="#B3B3B3" vTextAlign="Middle" hTextAlign="Left" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="style_44" vTextAlign="Middle" hTextAlign="Left" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true"/>
+  <style name="style_46" forecolor="#A5A5A5" vTextAlign="Middle" hTextAlign="Center" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true">
+    <box padding="1">
+      <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#00515D"/>
+    </box>
+  </style>
+  <style name="style_48" vTextAlign="Top" hTextAlign="Left" fontSize="14.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="style_49" vTextAlign="Middle" hTextAlign="Center" fontSize="12.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="style_52" vTextAlign="Middle" hTextAlign="Center" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true">
+    <box padding="1">
+      <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#595959"/>
+    </box>
+  </style>
+  <style name="style_56" backcolor="#F2F2F2" mode="Opaque" vTextAlign="Middle" hTextAlign="Left" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true">
+    <box padding="1">
+      <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#595959"/>
+    </box>
+  </style>
+  <style name="style_58" forecolor="#B3B3B3" vTextAlign="Middle" hTextAlign="Right" fontSize="6.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="EditableTextField" backcolor="#FFFFFF" mode="Opaque" forecolor="#00515D" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true">
+    <box padding="1">
+      <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#00ABC5"/>
+    </box>
+  </style>
+  <style name="EditableFocusedTextField" backcolor="#DBE5F1" mode="Opaque" forecolor="#00515D" fontSize="8.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true">
+    <box padding="1">
+      <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#00ABC5"/>
+      <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#00ABC5"/>
+      <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#00ABC5"/>
+      <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#00ABC5"/>
+    </box>
+  </style>
+  <style name="Finalized" backcolor="#3F8546" mode="Opaque" forecolor="#FFFFFF" fontSize="9.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="NotFinalized" backcolor="#CC0330" mode="Opaque" forecolor="#FFFFFF" fontSize="9.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <style name="Draft" backcolor="#B3B3B3" mode="Opaque" forecolor="#FFFFFF" fontSize="9.0" fontName="DejaVu Sans Condensed" isBlankWhenNull="true" isBold="true"/>
+  <parameter name="bank_logo" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="company_name" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="year" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="month" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="i18n_currency" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["MOEDA"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_iban" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["CONTA"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_start_date" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DATA INICIAL"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_end_date" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DATA FINAL"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="currency" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="iban" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="start_date" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="end_date" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="i18n_transaction_date" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DATA LANC."]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_posted_date" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DATA VALOR"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_description" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DESCRIÇÃO"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_value_db" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["DÉBITO"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_value_cr" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["CRÉDITO"]]></defaultValueExpression>
+  </parameter>
+  <parameter name="i18n_imported_balance" class="java.lang.String" isForPrompting="false">
+    <defaultValueExpression><![CDATA["SALDO"]]></defaultValueExpression>
+  </parameter>
+  <queryString><![CDATA[lines]]></queryString>
+  <field name="data_row_type" class="java.lang.String"/>
+  <field name="imported_balance" class="java.lang.Double"/>
+  <field name="transaction_date" class="java.lang.String"/>
+  <field name="posted_date" class="java.lang.String"/>
+  <field name="description" class="java.lang.String"/>
+  <field name="value_db" class="java.lang.Double"/>
+  <field name="value_cr" class="java.lang.Double"/>
+  <field name="transaction_info" class="java.lang.String"/>
+  <variable name="ON_LAST_PAGE" class="java.lang.Boolean" calculation="System"/>
+  <pageHeader>
+    <band height="83" splitType="Prevent">
+      <staticText>
+        <reportElement x="0" y="0" width="522" height="6" style="style_46"/>
+        <box padding="1"/>
+        <text><![CDATA[]]></text>
+      </staticText>
+      <staticText>
+        <reportElement x="0" y="6" width="384" height="18" style="style_48"/>
+        <box padding="1"/>
+        <text><![CDATA[EXTRATO COMBINADO]]></text>
+      </staticText>
+      <image scaleImage="RetainShape" hAlign="Left" vAlign="Middle" onErrorType="Blank">
+        <reportElement x="396" y="6" width="126" height="36" style="style_44"/>
+        <box padding="1"/>
+        <imageExpression><![CDATA[$P{bank_logo}]]></imageExpression>
+      </image>
+      <textField>
+        <reportElement x="0" y="24" width="384" height="18" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="0" y="48" width="168" height="29" style="style_49"/>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{year} + " / " + $P{month}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="174" y="48" width="54" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_currency}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="234" y="48" width="150" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_iban}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="396" y="48" width="60" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_start_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="462" y="48" width="60" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_end_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="174" y="60" width="54" height="17" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$P{currency}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="234" y="60" width="150" height="17" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$P{iban}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="396" y="60" width="60" height="17" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$P{start_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="462" y="60" width="60" height="17" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$P{end_date}]]></textFieldExpression>
+      </textField>
+    </band>
+  </pageHeader>
+  <columnHeader>
+    <band height="30" splitType="Prevent">
+      <staticText>
+        <reportElement x="246" y="0" width="192" height="18" style="style_36"/>
+        <box padding="1"/>
+        <text><![CDATA[SALDO INICIAL]]></text>
+      </staticText>
+      <textField pattern="#,##0.00">
+        <reportElement x="444" y="0" width="78" height="18" style="style_35">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$F{imported_balance}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="0" y="18" width="54" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_transaction_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="60" y="18" width="54" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_posted_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="120" y="18" width="186" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_description}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="312" y="18" width="60" height="12" style="style_43">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_value_db}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="378" y="18" width="60" height="12" style="style_58">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_value_cr}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="444" y="18" width="78" height="12" style="style_58">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$P{i18n_imported_balance}]]></textFieldExpression>
+      </textField>
+    </band>
+  </columnHeader>
+  <detail>
+    <band height="30" splitType="Prevent">
+      <textField>
+        <reportElement x="0" y="0" width="54" height="18" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{transaction_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="60" y="0" width="54" height="18" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{posted_date}]]></textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement x="120" y="0" width="186" height="18" style="style_44">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+      </textField>
+      <textField pattern="#,##0.00">
+        <reportElement x="312" y="0" width="60" height="18" style="style_41">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{value_db}]]></textFieldExpression>
+      </textField>
+      <textField pattern="#,##0.00">
+        <reportElement x="378" y="0" width="60" height="18" style="style_41">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{value_cr}]]></textFieldExpression>
+      </textField>
+      <textField pattern="#,##0.00">
+        <reportElement x="444" y="0" width="78" height="18" style="style_41">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1">
+          <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#D8D8D8"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{imported_balance}]]></textFieldExpression>
+      </textField>
+    </band>
+    <band height="12" splitType="Prevent">
+      <printWhenExpression><![CDATA[$F{transaction_info} != null]]></printWhenExpression>
+      <staticText>
+        <reportElement x="0" y="0" width="18" height="12" style="style_52"/>
+        <box padding="1">
+          <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#595959"/>
+        </box>
+        <text><![CDATA[]]></text>
+      </staticText>
+      <textField>
+        <reportElement x="18" y="0" width="504" height="12" style="style_56"/>
+        <box padding="1">
+          <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#595959"/>
+        </box>
+        <textFieldExpression><![CDATA[$F{transaction_info}]]></textFieldExpression>
+      </textField>
+    </band>
+  </detail>
+  <columnFooter>
+    <band height="18" splitType="Prevent">
+      <textField>
+        <reportElement x="246" y="0" width="192" height="18" style="style_36"/>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[($V{ON_ALL_ROWS_PROCESSED} ? "SALDO FINAL" : "A TRANSPORTAR") ]]></textFieldExpression>
+      </textField>
+      <textField pattern="#,##0.00">
+        <reportElement x="444" y="0" width="78" height="18" style="style_35">
+          <property name="casper.binding" value="{&quot;editable&quot;:{&quot;is&quot;:false}}"/>
+        </reportElement>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$F{imported_balance}]]></textFieldExpression>
+      </textField>
+    </band>
+  </columnFooter>
+  <pageFooter>
+    <band height="18" splitType="Prevent">
+      <staticText>
+        <reportElement x="0" y="6" width="30" height="12" style="style_31"/>
+        <box padding="1"/>
+        <text><![CDATA[Página:]]></text>
+      </staticText>
+      <textField evaluationTime="Now">
+        <reportElement x="30" y="6" width="18" height="12" style="style_32"/>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+      </textField>
+      <staticText>
+        <reportElement x="48" y="6" width="6" height="12" style="style_34"/>
+        <box padding="1"/>
+        <text><![CDATA[/]]></text>
+      </staticText>
+      <textField evaluationTime="Report">
+        <reportElement x="54" y="6" width="30" height="12" style="style_31"/>
+        <box padding="1"/>
+        <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+      </textField>
+    </band>
+  </pageFooter>
+</jasperReport>

@@ -25,7 +25,9 @@ require 'sp/excel/loader/version'
 Gem::Specification.new do |spec|
   spec.name          = 'sp-excel-loader'
   spec.version       = Sp::Excel::Loader::VERSION
-  spec.email         = ['vitor.@servicepartner.pt']
+  spec.email         = ['emi@cldware.com']
+  spec.bindir        = 'bin'
+  spec.executables   = ['xls2jrxml']
   spec.date          = '2012-10-17'
   spec.summary       = 'Excelloader'
   spec.description   = 'Extends RubyXL adding handling of excel tables and other conversion utilies'
@@ -39,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
 
+  spec.add_dependency 'awesome_print'
   spec.add_dependency 'rubyXL'
   spec.add_dependency 'json'
 end
