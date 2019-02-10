@@ -863,9 +863,6 @@ module Sp
                    /\A\$V{([a-zA-Z0-9_\-#]+)}\z/
                 rv = CasperTextField.new(self, expression)
 
-              when /.*\$[PFV]{.+}.*/
-                rv = CasperTextField.new(self, transform_expression(expression))
-
               when /\A\$I{.+}\z/
                 rv = Image.new()
 
@@ -878,11 +875,13 @@ module Sp
                   rv.image_expression = transform_expression(expression[3..expression.length-2])
                 end
 
+              when /.*\$[PFV]{.+}.*/
+                rv = CasperTextField.new(self, transform_expression(expression))
               end
 
             end
 
-            byebug if not rv.nil? and rv.text_field_expression.nil?
+            byebug if not rv.nil? and rv.respond_to?(:text_field_expression) and rv.text_field_expression.nil?
 
             unless rv
               rv = StaticText.new

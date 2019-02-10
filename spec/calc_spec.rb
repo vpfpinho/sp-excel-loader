@@ -8,6 +8,7 @@ RSpec.describe Sp::Excel::Loader do
   def clean_files
       File.delete('./spec/json/mcalc_spec.rb') if File.file?('./spec/json/mcalc_spec.rb')
       File.delete('./spec/json/model.json') if File.file?('./spec/json/model.json')
+      File.delete('./spec/json/model_typed.json') if File.file?('./spec/json/model_typed.json')
       File.delete('./spec/json/tables/payroll_grant_types.json') if File.file?('./spec/json/tables/payroll_grant_types.json')
       Dir.rmdir('./spec/json/tables') if File.exists?('./spec/json/tables')
       Dir.rmdir('./spec/json') if File.exists?('./spec/json')

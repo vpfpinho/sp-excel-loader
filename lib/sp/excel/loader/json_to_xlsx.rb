@@ -124,11 +124,11 @@ module Sp
                   value = 0
                 end
 
+
                 if ws[dst_row].nil? || ws[dst_row][col].nil?
-                  ws.add_cell(dst_row, col, value)
-                else
-                  ws[dst_row][col].change_contents(value)
+                  ws.add_cell(dst_row, col)
                 end
+                ws[dst_row][col].change_contents(value)
                 ws[dst_row][col].style_index = ws[header_row + 1][col].style_index
               end
               dst_row += 1
