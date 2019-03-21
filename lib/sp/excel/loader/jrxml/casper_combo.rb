@@ -66,12 +66,12 @@ module Sp
                 type: 'dropDownList',
                 version: 2,
                 controller: 'client',
-                route: @binding.uri.gsub('"', '""'),
+                route: @binding.uri,
                 display: fields,
                 html: html
               }
 
-            if @binding.respond_to?(:allow_clear) 
+            if @binding.respond_to?(:allow_clear)
               unless @binding.allow_clear.nil? or not @binding.allow_clear
                 @casper_binding[:attachment][:allowClear] = @binding.allow_clear
               end
