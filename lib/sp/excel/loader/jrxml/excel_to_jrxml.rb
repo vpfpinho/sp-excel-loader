@@ -140,12 +140,17 @@ module Sp
               if respond_to? ('variables_def') and not variables_def.nil?
                 variables_def.each do |vdef|
                   next if vdef.name.nil? or vdef.name.empty?
+                  vdef.name.gsub!(/^\$V{(.+)}$/, '\1')
                   variable = Variable.new(vdef.name)
                   variable.java_class               = vdef.java_class         unless vdef.java_class.nil? or vdef.java_class.empty?
                   variable.calculation              = vdef.calculation        unless vdef.calculation.nil? or vdef.calculation.empty?
                   variable.reset_type               = vdef.reset              unless vdef.reset.nil? or vdef.reset.empty?
                   variable.variable_expression      = vdef.expression         unless vdef.expression.nil? or vdef.expression.empty?
                   variable.initial_value_expression = vdef.initial_expression unless vdef.initial_expression.nil? or vdef.initial_expression.empty?
+                  if vdef.respond_to? :presentation and not vdef.presentation.nil? and not vdef.presentation.empty?
+                    variable.presentation = Presentation.new(vdef.presentation)
+                    @bindings["$V{#{vdef.name}}"] = variable
+                  end
                   @report.variables[vdef.name] = variable
                 end
               end
@@ -1000,7 +1005,7 @@ module Sp
                     elsif tag == 'PT' or tag == 'pattern' and a_field.respond_to?(:pattern)
                       a_field.pattern = value
                     elsif tag == 'ET' or tag == 'evaluationTime' and a_field.respond_to?(:evaluation_time)
-                      a_field.evaluation_time = value
+                      a_field.evaluation_time = value.capitalize
                     elsif tag == 'DE' or tag == 'disabledExpression'
                       if a_field.respond_to? :disabled_conditional
                         a_field.disabled_conditional(value)

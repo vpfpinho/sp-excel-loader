@@ -50,7 +50,6 @@ if ARGV.length != 1
   exit
 end
 
-puts $args[:compat].to_s.red
 #
 # Do the conversion
 #

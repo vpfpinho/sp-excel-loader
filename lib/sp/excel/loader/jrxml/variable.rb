@@ -31,6 +31,7 @@ module Sp
           attr_accessor :reset_type
           attr_accessor :variable_expression
           attr_accessor :initial_value_expression
+          attr_accessor :presentation
 
           def initialize (a_name, a_java_class = nil)
             @name         = a_name
@@ -40,6 +41,7 @@ module Sp
             @reset_type   = nil
             @variable_expression = nil
             @initial_value_expression = nil
+            @presentation = nil
           end
 
           def attributes
