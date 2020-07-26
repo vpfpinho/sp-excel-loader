@@ -28,6 +28,9 @@ module Sp
 
       class TableRow
         def self.factory(klass_name = nil)
+          if Object.constants.include?(klass_name.capitalize.to_sym)
+            Object.send(:remove_const, klass_name.capitalize.to_sym)
+          end
           klass = Class.new(self)
           Object.const_set(klass_name.capitalize, klass) unless klass_name.nil?
           klass
