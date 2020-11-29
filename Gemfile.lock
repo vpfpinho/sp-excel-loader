@@ -1,19 +1,19 @@
 PATH
   remote: .
   specs:
-    sp-excel-loader (0.3.45)
+    sp-excel-loader (0.3.52)
       awesome_print
       json
-      rubyXL
+      rubyXL (~> 3.3.29)
 
 GEM
   remote: https://rubygems.org/
   specs:
     awesome_print (1.8.0)
     diff-lcs (1.3)
-    json (2.1.0)
+    json (2.3.1)
     mini_portile2 (2.4.0)
-    nokogiri (1.9.1)
+    nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
     rake (12.3.1)
     rspec (3.7.0)
@@ -32,7 +32,7 @@ GEM
     rubyXL (3.3.33)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
-    rubyzip (1.2.2)
+    rubyzip (2.3.0)
 
 PLATFORMS
   ruby
@@ -44,4 +44,4 @@ DEPENDENCIES
   sp-excel-loader!
 
 BUNDLED WITH
-   1.16.2
+   1.17.3
