@@ -806,7 +806,7 @@ module Sp
                 rv.h_align = style.h_text_align
 
                 unless expression.nil?
-                  rv.image_expression = transform_expression(expression[3..expression.length-2])
+                  rv.image_expression = expression[3..expression.length-2]
                 end
 
               when /.*\$[PFV]{.+}.*/
@@ -925,7 +925,7 @@ module Sp
 
               unless expression.nil?
                 expression = expression.strip
-                rv.image_expression = transform_expression(expression[3..expression.length-2])
+                rv.image_expression = expression[3..expression.length-2]
               end
 
             elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'

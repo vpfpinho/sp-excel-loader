@@ -43,6 +43,9 @@ module Sp
           end
 
           def to_xml (a_node)
+            puts '======================================================================================='
+            puts "Image    = '#{@image_expression}'"
+
             Nokogiri::XML::Builder.with(a_node) do |xml|
               xml.image(attributes)
             end
