@@ -806,7 +806,7 @@ module Sp
                 rv.h_align = style.h_text_align
 
                 unless expression.nil?
-                  rv.image_expression = expression[3..expression.length-2]
+                  rv.image_expression = declare_expression_terms(expression[3..expression.length-2])
                 end
 
               when /.*\$[PFV]{.+}.*/
@@ -925,7 +925,7 @@ module Sp
 
               unless expression.nil?
                 expression = expression.strip
-                rv.image_expression = expression[3..expression.length-2]
+                rv.image_expression = declare_expression_terms(expression[3..expression.length-2])
               end
 
             elsif expression.include? '$P{' or expression.include? '$F{' or expression.include? '$V{'
@@ -1043,6 +1043,22 @@ module Sp
                 end
               end
             end
+          end
+
+          def declare_expression_terms (a_expression)
+            matches = a_expression.split(/(\$[PVF]{[a-zA-Z0-9\._]+})/)
+            matches.each do |match|
+              if match.length == 0
+                next
+              elsif match.start_with?('$P{')
+                add_parameter(match, match[3..-2])
+              elsif match.start_with?('$F{')
+                add_field(match, match[3..-2])
+              elsif match.start_with?('$V{')
+                add_variable(match, match[3..-2])
+              end
+            end
+            return a_expression
           end
 
           def transform_expression (a_expression)
