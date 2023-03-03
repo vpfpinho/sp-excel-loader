@@ -19,7 +19,10 @@
 #
 
 require 'set'
-
+require 'rubyXL/convenience_methods/workbook'
+require 'rubyXL/convenience_methods/worksheet'
+require 'rubyXL/convenience_methods/cell'
+require 'rubyXL/convenience_methods/font'
 
 module Sp
   module Excel
