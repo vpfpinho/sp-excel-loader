@@ -42,6 +42,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec'
 
   spec.add_dependency 'awesome_print'
-  spec.add_dependency 'rubyXL', '~> 3.3.29'
+  spec.add_dependency 'rubyXL', '~> 3.4.25'
   spec.add_dependency 'json'
 end
