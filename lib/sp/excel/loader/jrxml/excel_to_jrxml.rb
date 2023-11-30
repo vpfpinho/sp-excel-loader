@@ -19,10 +19,11 @@
 #
 
 require 'set'
-require 'rubyXL/convenience_methods/workbook'
-require 'rubyXL/convenience_methods/worksheet'
-require 'rubyXL/convenience_methods/cell'
-require 'rubyXL/convenience_methods/font'
+require 'rubyXL/convenience_methods'
+require 'rubyXL/convenience_methods'
+require 'rubyXL/convenience_methods'
+require 'rubyXL/convenience_methods'
+require 'byebug'
 
 module Sp
   module Excel
@@ -387,13 +388,18 @@ module Sp
               elsif a_xls_color.auto or a_xls_color.rgb.nil?
                 return '#000000'
               else
-                puts "a_xls_color: #{a_xls_color}"
-                puts "a_xls_color.rgb: #{a_xls_color.rgb}"
-                puts "a_xls_color.rgb[2..-1]: #{a_xls_color.rgb[2..-1]}"
-                return '#' + a_xls_color.rgb[2..-1]
+                tmp_color = a_xls_color.rgb[2..-1] == nil
+
+                return '#' if tmp_color.nil?
+
+                return '#' + tmp_color
               end
             else
-              return '#' + @@CT_IndexedColors[a_xls_color.indexed]
+              tmp_color = @@CT_IndexedColors[a_xls_color.indexed]
+
+              return '#' if tmp_color.nil?
+
+              return '#' + tmp_color
             end
           end
 
