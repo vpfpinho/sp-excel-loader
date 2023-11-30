@@ -387,6 +387,9 @@ module Sp
               elsif a_xls_color.auto or a_xls_color.rgb.nil?
                 return '#000000'
               else
+                puts "a_xls_color: #{a_xls_color}"
+                puts "a_xls_color.rgb: #{a_xls_color.rgb}"
+                puts "a_xls_color.rgb[2..-1]: #{a_xls_color.rgb[2..-1]}"
                 return '#' + a_xls_color.rgb[2..-1]
               end
             else
